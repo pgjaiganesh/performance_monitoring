@@ -16,7 +16,7 @@ function sendToAnalytics(metric) {
 
 onCLS(console.log);
 onFID(console.log);
-onLCP(console.log);
+onLCP(sendToAnalytics);
 onFCP(sendToAnalytics);
 onINP(console.log);
 onTTFB(sendToAnalytics);

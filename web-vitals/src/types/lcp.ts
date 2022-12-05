@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {Metric, ReportCallback} from './base.js';
-import {NavigationTimingPolyfillEntry} from './polyfills.js';
-
+import { Metric, ReportCallback } from './base.js';
+// import { NavigationTimingPolyfillEntry } from './polyfills.js';
 
 /**
  * An LCP-specific version of the Metric object.
@@ -69,16 +68,26 @@ export interface LCPAttribution {
    * The `navigation` entry of the current page, which is useful for diagnosing
    * general page load issues.
    */
-  navigationEntry?: PerformanceNavigationTiming | NavigationTimingPolyfillEntry;
+  // navigationEntry?: PerformanceNavigationTiming | NavigationTimingPolyfillEntry;
   /**
    * The `resource` entry for the LCP resource (if applicable), which is useful
    * for diagnosing resource load issues.
    */
-  lcpResourceEntry?: PerformanceResourceTiming;
+  // lcpResourceEntry?: PerformanceResourceTiming;
   /**
    * The `LargestContentfulPaint` entry corresponding to LCP.
    */
-  lcpEntry?: LargestContentfulPaint;
+  // lcpEntry?: LargestContentfulPaint;
+
+  cdn?: string;
+  //environment whether staging or prod..no value implies its prod
+  env?: string;
+
+  // name of the resource
+  name?: string;
+
+  //metric Type whether resource, navigation, ttfb, lcp 
+  metricType: string;
 }
 
 /**

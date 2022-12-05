@@ -15,10 +15,11 @@
  */
 
 
-import {getNavigationEntry} from '../lib/getNavigationEntry.js';
-import {getSelector} from '../lib/getSelector.js';
-import {onLCP as unattributedOnLCP} from '../onLCP.js';
-import {LCPAttribution, LCPMetric, LCPMetricWithAttribution, LCPReportCallback, LCPReportCallbackWithAttribution, ReportOpts} from '../types.js';
+import { getCDNProviderCacheStatus } from '../lib/getCDNProvider.js';
+import { getNavigationEntry } from '../lib/getNavigationEntry.js';
+import { getSelector } from '../lib/getSelector.js';
+import { onLCP as unattributedOnLCP } from '../onLCP.js';
+import { LCPAttribution, LCPMetric, LCPMetricWithAttribution, LCPReportCallback, LCPReportCallbackWithAttribution, ReportOpts } from '../types.js';
 
 
 const attributeLCP = (metric: LCPMetric) => {
@@ -28,9 +29,9 @@ const attributeLCP = (metric: LCPMetric) => {
     if (navigationEntry) {
       const activationStart = navigationEntry.activationStart || 0;
       const lcpEntry = metric.entries[metric.entries.length - 1];
-      const lcpResourceEntry = lcpEntry.url &&performance
-          .getEntriesByType('resource')
-          .filter((e) => e.name === lcpEntry.url)[0];
+      const lcpResourceEntry = lcpEntry.url && performance
+        .getEntriesByType('resource')
+        .filter((e) => e.name === lcpEntry.url)[0];
 
       const ttfb = Math.max(0, navigationEntry.responseStart - activationStart);
 
@@ -38,7 +39,7 @@ const attributeLCP = (metric: LCPMetric) => {
         ttfb,
         // Prefer `requestStart` (if TOA is set), otherwise use `startTime`.
         lcpResourceEntry ? (lcpResourceEntry.requestStart ||
-            lcpResourceEntry.startTime) - activationStart : 0
+          lcpResourceEntry.startTime) - activationStart : 0
       );
       const lcpResponseEnd = Math.max(
         lcpRequestStart,
@@ -49,23 +50,30 @@ const attributeLCP = (metric: LCPMetric) => {
         lcpEntry ? lcpEntry.startTime - activationStart : 0
       );
 
+      const env = navigationEntry.serverTiming.find(el => el.name === 'stage');
+      const cdnCacheStatus = getCDNProviderCacheStatus(navigationEntry.serverTiming);
+
       const attribution: LCPAttribution = {
         element: getSelector(lcpEntry.element),
         timeToFirstByte: ttfb,
         resourceLoadDelay: lcpRequestStart - ttfb,
         resourceLoadTime: lcpResponseEnd - lcpRequestStart,
         elementRenderDelay: lcpRenderTime - lcpResponseEnd,
-        navigationEntry,
-        lcpEntry,
+        // navigationEntry,
+        // lcpEntry,
+        cdn: cdnCacheStatus.cdn,
+        env: env ? env.description : "prod",
+        name: navigationEntry.name,
+        metricType: metric.name,
       };
 
       // Only attribution the URL and resource entry if they exist.
       if (lcpEntry.url) {
         attribution.url = lcpEntry.url;
       }
-      if (lcpResourceEntry) {
-        attribution.lcpResourceEntry = lcpResourceEntry;
-      }
+      // if (lcpResourceEntry) {
+      //   attribution.lcpResourceEntry = lcpResourceEntry;
+      // }
 
       (metric as LCPMetricWithAttribution).attribution = attribution;
       return;
@@ -77,6 +85,7 @@ const attributeLCP = (metric: LCPMetric) => {
     resourceLoadDelay: 0,
     resourceLoadTime: 0,
     elementRenderDelay: metric.value,
+    metricType: metric.name,
   };
 };
 
