@@ -1,0 +1,4 @@
+# percentile 
+stats pct(event_details.tlstime,90) by event_details.cdn,event_details.type,bin(1h)
+
+stats pct(event_details.tlstime,90),pct(event_details.ttfb,90),pct(event_details.ttlb,90) by metadata.countryCode as country,event_details.cdn as cdn ,event_details.type as resourcetype,bin(30s) as event_timestamp

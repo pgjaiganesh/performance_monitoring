@@ -1,0 +1,3 @@
+import { HttpResponse } from '@aws-sdk/protocol-http';
+export declare const responseToJson: (response: HttpResponse) => Promise<object>;
+export declare const responseToString: (response: HttpResponse) => Promise<string>;
