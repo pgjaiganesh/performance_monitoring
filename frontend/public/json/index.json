@@ -1,0 +1,10 @@
+[
+    {
+        "name": "*.jpg",
+        "value": ".jpg"
+    },
+    {
+        "name": "/scripts/*",
+        "value": "/scripts/"
+    }
+]

@@ -1,0 +1,37 @@
+{
+  "cdncwrumstackv1": {
+    "us-east-1-cwrummonitor": {
+      "app_monitor_configuration": [
+        {
+          "allow_cookies": true,
+          "enable_xray": false,
+          "excluded_pages": [],
+          "favorite_pages": [],
+          "guest_role_arn": "",
+          "identity_pool_id": "us-east-1:6989cd22-d8ea-4251-a57f-67d174956bf2",
+          "included_pages": [],
+          "session_sample_rate": 1,
+          "telemetries": [
+            "errors",
+            "http",
+            "performance"
+          ]
+        }
+      ],
+      "app_monitor_id": "94bd5b43-5052-424e-96bf-f12b0facb3bb",
+      "arn": "arn:aws:rum:us-east-1:444603092185:appmonitor/us-east-1-cdncwrumstackv1",
+      "cw_log_enabled": true,
+      "cw_log_group": "/aws/vendedlogs/RUMService_us-east-1-cdncwrumstackv194bd5b43",
+      "domain": "pgjaiganesh.com",
+      "id": "us-east-1-cdncwrumstackv1",
+      "name": "us-east-1-cdncwrumstackv1",
+      "tags": {
+        "createdBy": "cdncwrumstackv1"
+      },
+      "tags_all": {
+        "createdBy": "cdncwrumstackv1"
+      }
+    },
+    "us-east-1-username": "monitor1"
+  }
+}

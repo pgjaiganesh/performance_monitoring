@@ -3,15 +3,16 @@ import { onCLS, onFID, onLCP, onFCP, onINP, onTTFB, onResource } from './web-vit
 function sendToAnalytics(metric) {
 
     let payload = { ...metric.attribution };
+    // delete (payload.serverTiming);
     payload['delta'] = metric.delta;
     payload['value'] = metric.value;
     payload['rating'] = metric.rating;
 
     cwr('recordEvent', {
         type: 'cdn_metrics',
-        data: metric.attribution,
+        data: payload,
     });
-    console.log("Sent Metric :%j", payload);
+    console.log("Sent Metric :%j", metric);
 }
 
 onCLS(console.log);

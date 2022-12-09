@@ -90,6 +90,8 @@ declare global {
     node?: Node;
     previousRect: DOMRectReadOnly;
     currentRect: DOMRectReadOnly;
+    // env: string;
+    // cacheStatus: string;
   }
 
   // https://wicg.github.io/layout-instability/#sec-layout-shift

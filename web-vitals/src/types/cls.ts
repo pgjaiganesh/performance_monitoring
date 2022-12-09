@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LoadState, Metric, ReportCallback} from './base.js';
+import { LoadState, Metric, ReportCallback } from './base.js';
 
 
 /**
@@ -30,7 +30,7 @@ export interface CLSMetric extends Metric {
  * can be sent along with the CLS value for the current page visit in order
  * to help identify issues happening to real-users in the field.
  */
- export interface CLSAttribution {
+export interface CLSAttribution {
   /**
    * A selector identifying the first element (in document order) that
    * shifted when the single largest layout shift contributing to the page's
@@ -65,6 +65,16 @@ export interface CLSMetric extends Metric {
    * for details).
    */
   loadState?: LoadState;
+
+  // cdn?: string;
+  // //environment whether staging or prod..no value implies its prod
+  // env?: string;
+
+  // // name of the resource
+  // name?: string;
+
+  // //metric Type whether resource, navigation, ttfb, lcp 
+  // metricType: string;
 }
 
 /**

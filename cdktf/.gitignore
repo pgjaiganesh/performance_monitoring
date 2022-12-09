@@ -1,0 +1,13 @@
+*.d.ts
+# *.js
+node_modules/*
+cdktf.out
+cdktf.log
+.gen
+*terraform.*.tfstate*
+.terraform
+tsconfig.tsbuildinfo
+!jest.config.js
+!setup.js
+main_bkp.ts
+frontend/*

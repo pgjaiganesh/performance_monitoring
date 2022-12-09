@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import {getLoadState} from '../lib/getLoadState.js';
-import {getSelector} from '../lib/getSelector.js';
-import {onCLS as unattributedOnCLS} from '../onCLS.js';
-import {CLSReportCallback, CLSReportCallbackWithAttribution, CLSMetric, CLSMetricWithAttribution, ReportOpts} from '../types.js';
-
+import { getLoadState } from '../lib/getLoadState.js';
+import { getSelector } from '../lib/getSelector.js';
+import { onCLS as unattributedOnCLS } from '../onCLS.js';
+import { CLSReportCallback, CLSReportCallbackWithAttribution, CLSMetric, CLSMetricWithAttribution, ReportOpts } from '../types.js';
 
 const getLargestLayoutShiftEntry = (entries: LayoutShift[]) => {
   return entries.reduce((a, b) => a && a.value > b.value ? a : b);
