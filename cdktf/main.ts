@@ -1,5 +1,7 @@
 import { Construct } from "constructs";
-import { App, Aspects, TerraformStack, TerraformOutput, TerraformAsset, AssetType, Fn } from "cdktf";
+import { App, Aspects, TerraformStack, TerraformOutput, Fn } from "cdktf";
+// import { TerraformAsset, AssetType } from "cdktf";
+
 import * as s3 from "./.gen/providers/aws/s3-bucket";
 import * as s3obj from "./.gen/providers/aws/s3-object";
 import * as grafana from "./.gen/providers/aws/grafana-workspace";
@@ -13,11 +15,19 @@ import * as idpRoleAttachment from "./.gen/providers/aws/cognito-identity-pool-r
 import * as cfrhp from "./.gen/providers/aws/cloudfront-response-headers-policy";
 import * as awscalleridentity from "./.gen/providers/aws/data-aws-caller-identity";
 import * as ssoAdminInstance from "./.gen/providers/aws/data-aws-ssoadmin-instances";
+import * as acm from "./.gen/providers/aws/acm-certificate";
+import * as acmCertificateValidation from "./.gen/providers/aws/acm-certificate-validation";
+
+import * as route53 from "./.gen/providers/aws/route53-record";
+
+import * as cloudfront from "./.gen/providers/aws/cloudfront-distribution";
+import * as oai from "./.gen/providers/aws/cloudfront-origin-access-identity";
+
 import * as path from "path";
 import * as util from "util";
 import * as tags from "./tags";
-// import * as glob from 'glob';
-// import * as mime from 'mime-types';
+import * as glob from 'glob';
+import * as mime from 'mime-types';
 
 // const variables = {
 //   awsRegion: "us-east-1",
@@ -31,6 +41,7 @@ import * as tags from "./tags";
 // };
 
 const variables = {
+  createUser: false,
   awsRegion: "us-east-1",
   givenName: "Jai2",
   familyName: "Girinathan2",
@@ -38,7 +49,9 @@ const variables = {
   userName: "monitor1",
   email: "ganeshji+sso2@amazon.com",
   organizationalUnitId: "r-yidw",
-  domainname: "pgjaiganesh.com",
+  domainname: "cfmon.demos.edge.aws.dev",
+  hostedZoneId: "Z07319953J62AZLS1J9E2",
+  awsProfile: "demoportal",
 };
 
 const grafanaAssumePolicy = {
@@ -143,6 +156,20 @@ const idpUnAuthenticatedPolicy = {
   ]
 };
 
+const s3Policy = {
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CF OAI",
+      "Effect": "Allow",
+      "Action": "s3:GetObject",
+      "Principal": {
+        "AWS": "OAI_ARN"
+      },
+      "Resource": "S3_BUCKET_ARN"
+    }]
+};
+
 class CDNCWRUMStack extends TerraformStack {
   constructor(scope: Construct, id: string) {
     super(scope, id);
@@ -151,51 +178,53 @@ class CDNCWRUMStack extends TerraformStack {
 
     const awsProvider = new aws.AwsProvider(this, util.format("%s-%s", prefix, "aws"), {
       region: variables.awsRegion,
-      // profile: "fms_user",
+      profile: variables.awsProfile,
     });
 
     const bucket = new s3.S3Bucket(this, util.format("%s-%s", prefix, "bucket"), {
       bucketPrefix: `${prefix}-${id}`,
     });
 
-    // const files = glob.sync(path.resolve(__dirname, '/assets/**'), { absolute: false, nodir: true });
-    // console.log("Files count" + files.length);
-    // // Create bucket object for each file
-    // for (const file of files) {
-    //   console.log(file);
-    //   new s3obj.S3Object(this, `aws_s3_bucket_object_${path.basename(file)}`, {
-    //     dependsOn: [bucket],            // Wait untill the bucket is not created
-    //     key: file,       // Using relative path for folder structure on S3
-    //     bucket: bucket.bucket,
-    //     source: path.resolve(file),          // Using absolute path to upload
-    //     etag: `${Date.now()}`,
-    //     contentType: mime.contentType(path.extname(file)) || undefined       // Set the content-type for each object
-    //   });
-    // }
+    const oaiObj = new oai.CloudfrontOriginAccessIdentity(this, util.format("%s-%s", prefix, "oai"));
 
-    const measureConfig = new TerraformAsset(this, util.format("%s-%s", prefix, "measureConfig"), {
-      path: path.resolve(__dirname, './assets/scripts/measure.js'),
-      type: AssetType.FILE, // if left empty it infers directory and file
+    var s3PolicyStr = JSON.stringify(s3Policy);
+    s3PolicyStr = s3PolicyStr.replace("S3_BUCKET_ARN", bucket.arn);
+    s3PolicyStr = s3PolicyStr.replace("OAI_ARN", oaiObj.cloudfrontAccessIdentityPath);
+
+    bucket.policy = s3PolicyStr;
+
+    //upload css,images,css,jss
+    const files = glob.sync(path.resolve(__dirname, '../frontend/public/**'), { absolute: false, nodir: true });
+    console.log("Files count" + files.length);
+    files.forEach(file => {
+      console.log(file);
+      const key = path.relative(path.resolve(__dirname, '../frontend/public/'), path.resolve(file));
+      new s3obj.S3Object(this, `aws_s3_bucket_object_${path.basename(file)}`, {
+        dependsOn: [bucket],            // Wait untill the bucket is not created
+        key: `public/${key}`,       // Using relative path for folder structure on S3
+        bucket: bucket.bucket,
+        source: path.resolve(file),          // Using absolute path to upload
+        etag: `${Date.now()}`,
+        contentType: mime.contentType(path.extname(file)) || undefined       // Set the content-type for each object
+      });
     });
 
-    // Upload Lambda zip file to newly created S3 bucket
-    new s3obj.S3Object(this, util.format("%s-%s", prefix, "script"), {
-      bucket: bucket.bucket,
-      key: `${id}/scripts/${measureConfig.fileName}`,
-      source: measureConfig.path, // returns a posix path
+    // upload html pages
+
+    const files1 = glob.sync(path.resolve(__dirname, '../frontend/index*.html'), { absolute: false, nodir: true });
+    console.log("Files count" + files.length);
+    files1.forEach(file => {
+      console.log(file);
+      const key = path.relative(path.resolve(__dirname, '../frontend/'), path.resolve(file));
+      new s3obj.S3Object(this, `aws_s3_bucket_object_${path.basename(file)}`, {
+        dependsOn: [bucket],            // Wait untill the bucket is not created
+        key: `${key}`,       // Using relative path for folder structure on S3
+        bucket: bucket.bucket,
+        source: path.resolve(file),          // Using absolute path to upload
+        etag: `${Date.now()}`,
+        contentType: mime.contentType(path.extname(file)) || undefined       // Set the content-type for each object
+      });
     });
-
-    // const dashboardConfig = new TerraformAsset(this, util.format("%s-%s", prefix, "dashboardConfig"), {
-    //   path: path.resolve(__dirname, './assets/grafana.json'),
-    //   type: AssetType.FILE, // if left empty it infers directory and file
-    // });
-
-    // // Upload Lambda zip file to newly created S3 bucket
-    // new s3obj.S3Object(this, util.format("%s-%s", prefix, "dashboard"), {
-    //   bucket: bucket.bucket,
-    //   key: `${id}/dashboard/${dashboardConfig.fileName}`,
-    //   source: dashboardConfig.path, // returns a posix path
-    // });
 
     const callerIdentity = new awscalleridentity.DataAwsCallerIdentity(this, util.format("%s-%s", prefix, 'aws-caller-identity'));
 
@@ -222,27 +251,33 @@ class CDNCWRUMStack extends TerraformStack {
       roleArn: role.arn,
     });
 
-    const ssoAdmin = new ssoAdminInstance.DataAwsSsoadminInstances(this, util.format("%s-%s", prefix, "sso-admin"));
+    if (variables.createUser) {
+      const ssoAdmin = new ssoAdminInstance.DataAwsSsoadminInstances(this, util.format("%s-%s", prefix, "sso-admin"));
 
-    const userObj = new user.IdentitystoreUser(this, util.format("%s-%s", prefix, "sso-user"), {
-      name: {
-        givenName: variables.givenName,
-        familyName: variables.familyName,
-      },
-      identityStoreId: Fn.element(ssoAdmin.identityStoreIds, 0),
-      displayName: variables.displayName,
-      userName: variables.userName,
-      emails: {
-        primary: true,
-        value: variables.email,
-      },
-    });
+      const userObj = new user.IdentitystoreUser(this, util.format("%s-%s", prefix, "sso-user"), {
+        name: {
+          givenName: variables.givenName,
+          familyName: variables.familyName,
+        },
+        identityStoreId: Fn.element(ssoAdmin.identityStoreIds, 0),
+        displayName: variables.displayName,
+        userName: variables.userName,
+        emails: {
+          primary: true,
+          value: variables.email,
+        },
+      });
 
-    new roleassociation.GrafanaRoleAssociation(this, util.format("%s-%s", prefix, "grafana-role-association"), {
-      role: "ADMIN",
-      userIds: [userObj.userId],
-      workspaceId: gworkspace.id,
-    });
+      new roleassociation.GrafanaRoleAssociation(this, util.format("%s-%s", prefix, "grafana-role-association"), {
+        role: "ADMIN",
+        userIds: [userObj.userId],
+        workspaceId: gworkspace.id,
+      });
+
+      new TerraformOutput(this, util.format("%s-%s", prefix, "username"), {
+        value: userObj.userName,
+      });
+    }
 
     const identityPool = new idp.CognitoIdentityPool(this, util.format("%s-%s", prefix, 'idp'), {
       identityPoolName: `${prefix}-${id}`,
@@ -284,7 +319,7 @@ class CDNCWRUMStack extends TerraformStack {
     });
 
     new cfrhp.CloudfrontResponseHeadersPolicy(this, util.format("%s-%s", prefix, "cfrhp"), {
-      name: `${prefix}-sth-tao-policy`,
+      name: `${prefix}-${id}-sth-tao-policy`,
       serverTimingHeadersConfig: {
         enabled: true,
         samplingRate: 1,
@@ -298,10 +333,119 @@ class CDNCWRUMStack extends TerraformStack {
       }
     });
 
-    new TerraformOutput(this, util.format("%s-%s", prefix, "username"), {
-      value: userObj.userName,
+    const cert = new acm.AcmCertificate(this, util.format("%s-%s", prefix, "cert"), {
+      domainName: variables.domainname,
+      validationMethod: "DNS",
+      provider: awsProvider,
     });
 
+    const record = new route53.Route53Record(
+      this,
+      util.format("%s-%s", prefix, "r53Record"),
+      {
+        name: cert.domainValidationOptions.get(0).resourceRecordName,
+        type: cert.domainValidationOptions.get(0).resourceRecordType,
+        records: [cert.domainValidationOptions.get(0).resourceRecordValue],
+        // zoneId: zone.zoneId,
+        zoneId: variables.hostedZoneId,
+        ttl: 60,
+        allowOverwrite: true,
+      }
+    );
+
+    new acmCertificateValidation.AcmCertificateValidation(
+      this,
+      util.format("%s-%s", prefix, "certvalidation"),
+      {
+        certificateArn: cert.arn,
+        validationRecordFqdns: [record.fqdn],
+        provider: awsProvider,
+      }
+    );
+
+    const distribution = new cloudfront.CloudfrontDistribution(
+      this,
+      util.format("%s-%s", prefix, "cloudfront"),
+      {
+        enabled: true,
+        isIpv6Enabled: true,
+
+        viewerCertificate: {
+          acmCertificateArn: cert.arn,
+          sslSupportMethod: "sni-only",
+        },
+
+        restrictions: {
+          geoRestriction: {
+            restrictionType: "none",
+          },
+        },
+
+        origin: [
+          {
+            originId: "s3",
+            domainName: bucket.bucketRegionalDomainName,
+            s3OriginConfig: {
+              originAccessIdentity: oaiObj.cloudfrontAccessIdentityPath
+            },
+          },
+        ],
+
+        aliases: [variables.domainname],
+
+        defaultCacheBehavior: {
+          minTtl: 0,
+          defaultTtl: 60,
+          maxTtl: 86400,
+          allowedMethods: [
+            "DELETE",
+            "GET",
+            "HEAD",
+            "OPTIONS",
+            "PATCH",
+            "POST",
+            "PUT",
+          ],
+          cachedMethods: ["GET", "HEAD"],
+          targetOriginId: "s3",
+          viewerProtocolPolicy: "redirect-to-https",
+          forwardedValues: {
+            cookies: {
+              forward: "all",
+            },
+            headers: [
+              "Host",
+              "Accept-Datetime",
+              "Accept-Encoding",
+              "Accept-Language",
+              "User-Agent",
+              "Referer",
+              "Origin",
+              "X-Forwarded-Host",
+            ],
+            queryString: true,
+          },
+        },
+      }
+    );
+
+    new route53.Route53Record(this, "distribution_domain", {
+      name: variables.domainname,
+      type: "A",
+      // zoneId: zone.zoneId,
+      zoneId: variables.hostedZoneId,
+      alias: [
+        {
+          name: distribution.domainName,
+          zoneId: distribution.hostedZoneId,
+          evaluateTargetHealth: true,
+        },
+      ],
+    });
+
+    new TerraformOutput(this, util.format("%s-%s", prefix, "distribution"), {
+      value: distribution,
+    });
     new TerraformOutput(this, util.format("%s-%s", prefix, "cwrummonitor"), {
       value: cwrumMonitor,
     });
@@ -309,7 +453,7 @@ class CDNCWRUMStack extends TerraformStack {
 };
 
 const app = new App();
-const myStack = new CDNCWRUMStack(app, "cdncwrumstackv1");
+const myStack = new CDNCWRUMStack(app, "cfmonitor");
 // Add tags to every resource defined within `myStack`.
-Aspects.of(myStack).add(new tags.TagsAddingAspect({ createdBy: "cdncwrumstackv1" }));
+Aspects.of(myStack).add(new tags.TagsAddingAspect({ createdBy: "cfmonitor" }));
 app.synth();

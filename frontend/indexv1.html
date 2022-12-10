@@ -2,33 +2,33 @@
     <head>
   <script>
   !function(){var e,t,n,i,r={passive:!0,capture:!0},a=new Date,o=function(){i=[],t=-1,e=null,f(addEventListener)},c=function(i,r){e||(e=r,t=i,n=new Date,f(removeEventListener),u())},u=function(){if(t>=0&&t<n-a){var r={entryType:"first-input",name:e.type,target:e.target,cancelable:e.cancelable,startTime:e.timeStamp,processingStart:e.timeStamp+t};i.forEach((function(e){e(r)})),i=[]}},s=function(e){if(e.cancelable){var t=(e.timeStamp>1e12?new Date:performance.now())-e.timeStamp;"pointerdown"==e.type?function(e,t){var n=function(){c(e,t),a()},i=function(){a()},a=function(){removeEventListener("pointerup",n,r),removeEventListener("pointercancel",i,r)};addEventListener("pointerup",n,r),addEventListener("pointercancel",i,r)}(t,e):c(t,e)}},f=function(e){["mousedown","keydown","touchstart","pointerdown"].forEach((function(t){return e(t,s,r)}))},p="hidden"===document.visibilityState?0:1/0;addEventListener("visibilitychange",(function e(t){"hidden"===document.visibilityState&&(p=t.timeStamp,removeEventListener("visibilitychange",e,!0))}),!0);o(),self.webVitals={firstInputPolyfill:function(e){i.push(e),u()},resetFirstInputPolyfill:o,get firstHiddenTime(){return p}}}();
-  (function(n,i,v,r,s,c,x,z){x=window.AwsRumClient={q:[],n:n,i:i,v:v,r:r,c:c};window[n]=function(c,p){x.q.push({c:c,p:p});};z=document.createElement('script');z.async=true;z.src=s;document.head.insertBefore(z,document.head.getElementsByTagName('script')[0]);})(
+   (function(n,i,v,r,s,c,x,z){x=window.AwsRumClient={q:[],n:n,i:i,v:v,r:r,c:c};window[n]=function(c,p){x.q.push({c:c,p:p});};z=document.createElement('script');z.async=true;z.src=s;document.head.insertBefore(z,document.head.getElementsByTagName('script')[0]);})(
     'cwr',
-    'd596f360-545d-4504-a4bb-ce7b710e7d42',
+    '7f414c06-9ede-4071-a508-058fb1e1ee6c',
     '1.0.0',
     'us-east-1',
-    './public/scripts/cwr.js',
+    'https://client.rum.us-east-1.amazonaws.com/1.12.0/cwr.js',
     {
       sessionSampleRate: 1,
-      guestRoleArn: "arn:aws:iam::444603092185:role/RUM-Monitor-us-east-1-444603092185-4169003610761-Unauth",
-      identityPoolId: "us-east-1:38ce4d14-66f7-41c2-8099-74f1405e7d84",
+      guestRoleArn: "arn:aws:iam::646874766338:role/CloudFrontMonitoringStack-idprole816BAD8B-1AVCS5XW60BVR",
+      identityPoolId: "us-east-1:0c34fd38-7620-439c-9ba5-f907b86dce8b",
       endpoint: "https://dataplane.rum.us-east-1.amazonaws.com",
-      telemetries: ["performance","errors","http"],
+      telemetries: ["errors","http"],
       allowCookies: true,
       enableXRay: false
     }
   );
 </script>
-  <script async src="./public/scripts/measure1.js" type="module"></script>
-  <link rel="stylesheet" href="https://cf.pgjaiganesh.com/public/css/main.css">
-    <link rel="stylesheet" href="https://cf.pgjaiganesh.com/public/css/servicehomepage.css">
+<script async src="./public/scripts/measure1.js" type="module"></script>
+  <link rel="stylesheet" href="./public/css/main.css">
+    <link rel="stylesheet" href="./public/css/servicehomepage.css">
     </head>
     <body>
          Test Page 
-        <img src="https://cf.pgjaiganesh.com/images/image1.jpeg" width="300"/>
-        <img src="https://cf.pgjaiganesh.com/images/image2.jpeg" width="300"/>
-        <img src="https://cf.pgjaiganesh.com/images/image3.jpeg" width="300"/>
-        <img src="https://cf.pgjaiganesh.com/images/image4.jpeg" width="300"/>
-        <img src="https://cf.pgjaiganesh.com/images/image5.jpeg" width="300"/>
+        <img src="./public/images/bruno-emmanuelle-oBzeCH75UHE-unsplash.jpg" width="300"/>
+        <img src="./public/images/hans-isaacson-gWsvWQaYexo-unsplash.jpg" width="300"/>
+        <img src="./public/images/henry-lai-aVW-9y-sS3E-unsplash.jpg" width="300"/>
+        <img src="./public/images/jeremy-hynes-QmSKOT7rnWQ-unsplash.jpg" width="300"/>
+        <img src="./public/images/jocelyn-morales-WMyeXpXNMYs-unsplash.jpg" width="300"/>
     </body>
 </html>
