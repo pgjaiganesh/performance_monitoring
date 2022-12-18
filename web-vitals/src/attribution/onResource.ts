@@ -29,14 +29,19 @@ const attributeResource = (metric: ResourceMetric): void => {
       performanceEntry.connectStart - activationStart, 0);
     const requestStart = Math.max(
       performanceEntry.requestStart - activationStart, 0);
+    const responseStart = Math.max(
+      performanceEntry.responseStart - activationStart, 0);
+
     const env = performanceEntry.serverTiming.find(el => el.name === 'stage');
     const cdnCacheStatus = getCDNProviderCacheStatus(performanceEntry.serverTiming);
 
+    // console.log("Response status ", performanceEntry.responseStatus);
     (metric as ResourceMetricWithAttribution).attribution = {
       waitingTime: dnsStart,
       dnsTime: connectStart - dnsStart,
       connectionTime: requestStart - connectStart,
-      requestTime: metric.value - requestStart,
+      requestTime: responseStart - requestStart,
+      // requestTime: metric.value - requestStart,
       transferSize: performanceEntry.transferSize,
       // performanceEntry: performanceEntry,
       compressRate: 1 - (performanceEntry.encodedBodySize / performanceEntry.decodedBodySize),

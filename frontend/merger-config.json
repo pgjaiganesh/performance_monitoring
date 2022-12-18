@@ -1,0 +1,31 @@
+{
+	"uglify": true,
+	"mergerJsLinks": {
+		"npm": "https://www.npmjs.com/package/merger-js",
+		"github": "https://github.com/joao-neves95/merger-js",
+		"readme": "https://github.com/joao-neves95/merger-js/blob/master/README.md",
+		"changelog": "https://github.com/joao-neves95/merger-js/blob/master/CHANGELOG.md"
+	},
+	"autoBuild": true,
+	"notifications": false,
+	"updateOnLaunch": true,
+	"lastUpdateCheck": "2022-12-15T17:09:15.000Z",
+	"sourceFiles": [
+		{
+			"source": "/Users/ganeshji/workspaces/performance_sdk_v2/frontend/public/scripts/web-vitals.attribution.js",
+			"output": {
+				"path": "/Users/ganeshji/workspaces/performance_sdk_v2/frontend/public/scripts/",
+				"name": "cfrum.js"
+			},
+			"config": null
+		},
+		{
+			"source": "/Users/ganeshji/workspaces/performance_sdk_v2/frontend/public/scripts/measure1.js",
+			"output": {
+				"path": "/Users/ganeshji/workspaces/performance_sdk_v2/frontend/public/scripts/",
+				"name": "cfrum.js"
+			},
+			"config": null
+		}
+	]
+}

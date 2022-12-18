@@ -19,6 +19,8 @@ export interface CdkStackProps extends StackProps {
   domainName: any;
   monitorDomainPrefix: any;
   profile: any;
+  deployStaging: boolean;
+  deployMultiCDN: boolean;
 }
 
 export class CdkStack extends cdk.Stack {
@@ -58,8 +60,14 @@ export class CdkStack extends cdk.Stack {
       defaultTtl: Duration.seconds(30),
     });
 
-    let defaultResponseHeaderPolicies = [this.createResponseHeaderPolicy("default", "default", "prod"),
-    this.createResponseHeaderPolicy("default", "default", "stage")];
+    let cfFunction = new cloudfront.Function(this, "CDNRandomizer", {
+      code: cloudfront.FunctionCode.fromFile({
+        filePath: path.join(__dirname, '../src/cloudfront-functions/viewer-response/index.js')
+      })
+    });
+
+    let envProd = "prod";
+    let defaultResponseHeaderPolicies = [this.createResponseHeaderPolicy1("default", "default", envProd)];
     let distribution = new cloudfront.Distribution(this, "cf", {
 
       defaultBehavior: {
@@ -67,7 +75,14 @@ export class CdkStack extends cdk.Stack {
         allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD_OPTIONS,
         cachePolicy: cachePolicy,
-        responseHeadersPolicy: defaultResponseHeaderPolicies[0],
+        responseHeadersPolicy: cloudfront.ResponseHeadersPolicy.fromResponseHeadersPolicyId(
+          this, util.format("%s-%s-%s", Stack.of(this).stackName, "default", envProd), defaultResponseHeaderPolicies[0].attrId),
+        ...(props?.deployMultiCDN && {
+          functionAssociations: [{
+            function: cfFunction,
+            eventType: cloudfront.FunctionEventType.VIEWER_RESPONSE,
+          }]
+        }),
       },
       certificate: cert,
       domainNames: [fqdn],
@@ -92,14 +107,33 @@ export class CdkStack extends cdk.Stack {
 
     behaviors.map(behavior => {
       // let responseHeaderPolicies = [this.createResponseHeaderPolicy(behavior, behavior),
-      this.createResponseHeaderPolicy(behavior.name, behavior.pattern, "stage");
+      // this.createResponseHeaderPolicy(behavior.name, behavior.pattern, "stage");
+      // this.createResponseHeaderPolicy1(behavior.name, behavior.pattern, envStage);
       distribution.addBehavior(behavior.pattern, s3Origin, {
         allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD_OPTIONS,
         cachePolicy: cachePolicy,
-        responseHeadersPolicy: this.createResponseHeaderPolicy(behavior.name, behavior.pattern, "prod"),
+        responseHeadersPolicy: cloudfront.ResponseHeadersPolicy.fromResponseHeadersPolicyId(this,
+          util.format("%s-%s-%s", Stack.of(this).stackName, behavior.name, envProd), this.createResponseHeaderPolicy1(behavior.name, behavior.pattern, envProd).attrId),
+        ...(props?.deployMultiCDN && {
+          functionAssociations: [{
+            function: cfFunction,
+            eventType: cloudfront.FunctionEventType.VIEWER_RESPONSE,
+          }]
+        }),
       })
     });
+
+    if (props?.deployStaging) {
+      let envStage = "stage";
+      this.createResponseHeaderPolicy1("default", "default", envStage);
+
+      behaviors.map(behavior => {
+        // let responseHeaderPolicies = [this.createResponseHeaderPolicy(behavior, behavior),
+        // this.createResponseHeaderPolicy(behavior.name, behavior.pattern, "stage");
+        this.createResponseHeaderPolicy1(behavior.name, behavior.pattern, envStage);
+      });
+    }
 
     route53Construct.addCFRecord(distribution, props?.monitorDomainPrefix!);
 
@@ -183,25 +217,105 @@ export class CdkStack extends cdk.Stack {
     });
   }
 
-  createResponseHeaderPolicy(name: string, pattern: string, stage?: string): cloudfront.ResponseHeadersPolicy {
-    return new cloudfront.ResponseHeadersPolicy(this, `${name}${stage}`,
-      {
-        corsBehavior: {
-          accessControlAllowOrigins: ['*'],
-          accessControlAllowHeaders: ['*'],
+  // createResponseHeaderPolicy(name: string, pattern: string, stage?: string): cloudfront.ResponseHeadersPolicy {
+  //   return new cloudfront.ResponseHeadersPolicy(this, `${name}${stage}`,
+  //     {
+  //       corsBehavior: {
+  //         accessControlAllowOrigins: ['*'],
+  //         accessControlAllowHeaders: ['*'],
+  //         accessControlAllowCredentials: false,
+  //         accessControlExposeHeaders: ['*'],
+  //         accessControlAllowMethods: ['GET', 'POST'],
+  //         originOverride: false,
+  //       },
+  //       customHeadersBehavior: {
+  //         customHeaders: [
+  //           { header: 'Timing-Allow-Origin', value: '*', override: false },
+  //           {
+  //             header: 'Server-Timing', value: `behavior;desc="${pattern}",stage;desc="${stage}"`, override: false
+  //           },
+  //         ],
+  //       },
+
+  //     });
+  // }
+
+  createResponseHeaderPolicy1(name: string, pattern: string, stage?: string): cloudfront.CfnResponseHeadersPolicy {
+
+    return new cloudfront.CfnResponseHeadersPolicy(this, util.format("%s-%s-%s-cfn", Stack.of(this).stackName, name, stage), {
+      responseHeadersPolicyConfig: {
+        name: util.format("%s-%s-%s", Stack.of(this).stackName, name, stage),
+        corsConfig: {
           accessControlAllowCredentials: false,
-          accessControlExposeHeaders: ['*'],
-          accessControlAllowMethods: ['GET', 'POST'],
+          accessControlAllowHeaders: {
+            items: ['*'],
+          },
+          accessControlAllowMethods: {
+            items: ['GET', 'POST'],
+          },
+          accessControlAllowOrigins: {
+            items: ['*'],
+          },
           originOverride: false,
+          // the properties below are optional
+          // accessControlExposeHeaders: {
+          //   items: ['*'],
+          // },
+          // accessControlMaxAgeSec: 600,
         },
-        customHeadersBehavior: {
-          customHeaders: [
-            { header: 'Timing-Allow-Origin', value: '*', override: false },
+        customHeadersConfig: {
+          items: [
             {
-              header: 'Server-Timing', value: `behavior;desc="${pattern}",stage;desc="${stage}"`, override: false
+              header: 'Timing-Allow-Origin',
+              override: false,
+              value: '*',
+            },
+            {
+              header: 'Server-Timing',
+              override: false,
+              value: `behavior;desc="${pattern}",stage;desc="${stage}"`,
             },
           ],
-        }
-      });
+        },
+        // securityHeadersConfig: {
+        //   contentSecurityPolicy: {
+        //     contentSecurityPolicy: 'contentSecurityPolicy',
+        //     override: false,
+        //   },
+        //   contentTypeOptions: {
+        //     override: false,
+        //   },
+        //   frameOptions: {
+        //     frameOption: 'frameOption',
+        //     override: false,
+        //   },
+        //   referrerPolicy: {
+        //     override: false,
+        //     referrerPolicy: 'referrerPolicy',
+        //   },
+        //   strictTransportSecurity: {
+        //     accessControlMaxAgeSec: 123,
+        //     override: false,
+
+        //     // the properties below are optional
+        //     includeSubdomains: false,
+        //     preload: false,
+        //   },
+        //   xssProtection: {
+        //     override: false,
+        //     protection: false,
+
+        //     // the properties below are optional
+        //     modeBlock: false,
+        //     reportUri: 'reportUri',
+        //   },
+        // },
+        serverTimingHeadersConfig: {
+          enabled: true,
+          // the properties below are optional
+          samplingRate: 100,
+        },
+      },
+    });
   }
 }

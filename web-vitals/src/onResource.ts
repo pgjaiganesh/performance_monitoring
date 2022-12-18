@@ -66,6 +66,7 @@ export const onResource = (onReport: ReportCallback, opts?: ReportOpts) => {
       report = bindReporter(onReport, metric, thresholds, opts?.reportAllChanges);
       // Only report if the page wasn't hidden prior to the first input.
       // console.log("Entry :%j", entry);
+      // total time
       metric.value = entry.responseEnd - entry.startTime;
       metric.entries = [entry];
       report(true);

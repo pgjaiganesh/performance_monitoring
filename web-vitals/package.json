@@ -84,6 +84,7 @@
   },
   "files": [
     "attribution.js",
+    "../frontend/public/scripts/measure1.js",
     "attribution.d.ts",
     "base.js",
     "base.d.ts",

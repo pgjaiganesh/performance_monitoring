@@ -1,5 +1,3 @@
-import { onCLS, onFID, onLCP, onFCP, onINP, onTTFB, onResource } from './web-vitals.attribution.js';
-
 function sendToAnalytics(metric) {
 
     let attr = {};

@@ -22,3 +22,4 @@ export { onLCP } from './attribution/onLCP.js';
 export { onTTFB } from './attribution/onTTFB.js';
 export { onResource } from './attribution/onResource.js';
 export * from './types.js';
+export { sendToAnalytics } from './measure.js';

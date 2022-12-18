@@ -14,6 +14,10 @@ export AWS_PROFILE="demoportal"
 export HOSTEDZONE_ID='Z07319953J62AZLS1J9E2'
 export DOMAIN_NAME='demos.edge.aws.dev'
 export MONITOR_DOMAIN_PREFIX="cfmon1"
+export MONITOR_DOMAIN_PREFIX="multicdn"
+# deploy staging configuration for CloudFront.Currently only ResponseHeaderPolicies are created
+export DEPLOY_STAGING="TRUE"
+export DEPLOY_MULTICDN="FALSE"
 # DEPLOY_AWS_REGIONS=('us-east-1' 'us-west-1' 'eu-west-1' 'eu-central-1' 'ap-south-1' 'ap-southeast-1' 'ap-southeast-2')
 # DEPLOY_AWS_REGIONS=('us-east-1' 'us-west-1' 'eu-west-1' )
 DEPLOY_AWS_REGIONS=('us-east-1' )
