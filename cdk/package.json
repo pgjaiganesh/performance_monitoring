@@ -22,7 +22,8 @@
     "typescript": "~3.9.7"
   },
   "dependencies": {
-    "aws-cdk-lib": "2.54.0",
+    "@aws-cdk/aws-grafana": "^1.183.0",
+    "aws-cdk-lib": "2.55.1",
     "constructs": "^10.0.0",
     "source-map-support": "^0.5.21"
   }

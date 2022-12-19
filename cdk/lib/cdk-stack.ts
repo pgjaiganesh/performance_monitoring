@@ -13,6 +13,7 @@ import { R53Construct } from './R53Construct';
 import { aws_rum as rum } from 'aws-cdk-lib';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as grafana from 'aws-cdk-lib/aws-grafana';
 
 export interface CdkStackProps extends StackProps {
   hostedZoneId: any;
@@ -21,6 +22,7 @@ export interface CdkStackProps extends StackProps {
   profile: any;
   deployStaging: boolean;
   deployMultiCDN: boolean;
+  organizationalUnitId: string;
 }
 
 export class CdkStack extends cdk.Stack {
@@ -48,7 +50,10 @@ export class CdkStack extends cdk.Stack {
       validation: acm.CertificateValidation.fromDns(route53Construct.portalHostedZone),
     });
 
-    let s3Origin = new origins.S3Origin(s3Bucket);
+    let originId = "s3origin";
+    let s3Origin = new origins.S3Origin(s3Bucket, {
+      originId,
+    });
 
     let cachePolicy = new cloudfront.CachePolicy(this, "cachePolicy", {
       // headerBehavior: cloudfront.CacheHeaderBehavior.allowList('origin'),
@@ -67,7 +72,7 @@ export class CdkStack extends cdk.Stack {
     });
 
     let envProd = "prod";
-    let defaultResponseHeaderPolicies = [this.createResponseHeaderPolicy1("default", "default", envProd)];
+    let defaultResponseHeaderPolicies = [this.createResponseHeaderPolicy1("default", "default", envProd, originId)];
     let distribution = new cloudfront.Distribution(this, "cf", {
 
       defaultBehavior: {
@@ -114,7 +119,7 @@ export class CdkStack extends cdk.Stack {
         cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD_OPTIONS,
         cachePolicy: cachePolicy,
         responseHeadersPolicy: cloudfront.ResponseHeadersPolicy.fromResponseHeadersPolicyId(this,
-          util.format("%s-%s-%s", Stack.of(this).stackName, behavior.name, envProd), this.createResponseHeaderPolicy1(behavior.name, behavior.pattern, envProd).attrId),
+          util.format("%s-%s-%s", Stack.of(this).stackName, behavior.name, envProd), this.createResponseHeaderPolicy1(behavior.name, behavior.pattern, envProd, originId).attrId),
         ...(props?.deployMultiCDN && {
           functionAssociations: [{
             function: cfFunction,
@@ -126,12 +131,11 @@ export class CdkStack extends cdk.Stack {
 
     if (props?.deployStaging) {
       let envStage = "stage";
-      this.createResponseHeaderPolicy1("default", "default", envStage);
-
+      this.createResponseHeaderPolicy1("default", "default", envStage, originId);
       behaviors.map(behavior => {
         // let responseHeaderPolicies = [this.createResponseHeaderPolicy(behavior, behavior),
         // this.createResponseHeaderPolicy(behavior.name, behavior.pattern, "stage");
-        this.createResponseHeaderPolicy1(behavior.name, behavior.pattern, envStage);
+        this.createResponseHeaderPolicy1(behavior.name, behavior.pattern, envStage, originId);
       });
     }
 
@@ -215,32 +219,91 @@ export class CdkStack extends cdk.Stack {
       },
       cwLogEnabled: true,
     });
+    this.createGrafanaWorkspace(props?.organizationalUnitId);
   }
 
-  // createResponseHeaderPolicy(name: string, pattern: string, stage?: string): cloudfront.ResponseHeadersPolicy {
-  //   return new cloudfront.ResponseHeadersPolicy(this, `${name}${stage}`,
-  //     {
-  //       corsBehavior: {
-  //         accessControlAllowOrigins: ['*'],
-  //         accessControlAllowHeaders: ['*'],
-  //         accessControlAllowCredentials: false,
-  //         accessControlExposeHeaders: ['*'],
-  //         accessControlAllowMethods: ['GET', 'POST'],
-  //         originOverride: false,
-  //       },
-  //       customHeadersBehavior: {
-  //         customHeaders: [
-  //           { header: 'Timing-Allow-Origin', value: '*', override: false },
-  //           {
-  //             header: 'Server-Timing', value: `behavior;desc="${pattern}",stage;desc="${stage}"`, override: false
-  //           },
-  //         ],
-  //       },
+  createGrafanaWorkspace(orgId?: string) {
+    let role = new iam.Role(this, "grafana-role1", {
+      assumedBy: new iam.ServicePrincipal('grafana.amazonaws.com', {
+        conditions:
+        {
+          "StringEquals": {
+            "aws:SourceAccount": `${Stack.of(this).account}`
+          },
+          "StringLike": {
+            "aws:SourceArn": `arn:aws:grafana:${Stack.of(this).region}:${Stack.of(this).account}:/workspaces/*`
+          }
+        }
+      }),
+      inlinePolicies: {
+        customPolicy1: new iam.PolicyDocument({
+          statements: [
+            new iam.PolicyStatement({
+              resources: ['*'],
+              effect: iam.Effect.ALLOW,
+              actions: ["cloudwatch:DescribeAlarmsForMetric",
+                "cloudwatch:DescribeAlarmHistory",
+                "cloudwatch:DescribeAlarms",
+                "cloudwatch:ListMetrics",
+                "cloudwatch:GetMetricStatistics",
+                "cloudwatch:GetMetricData",
+                "cloudwatch:GetInsightRuleReport"],
+            }),
+            new iam.PolicyStatement({
+              resources: ['*'],
+              effect: iam.Effect.ALLOW,
+              actions: ["logs:DescribeLogGroups",
+                "logs:GetLogGroupFields",
+                "logs:StartQuery",
+                "logs:StopQuery",
+                "logs:GetQueryResults",
+                "logs:GetLogEvents"]
+            }),
+            new iam.PolicyStatement({
+              resources: ['*'],
+              effect: iam.Effect.ALLOW,
+              actions: ["ec2:DescribeTags",
+                "ec2:DescribeInstances",
+                "ec2:DescribeRegions"]
+            }),
+            new iam.PolicyStatement({
+              resources: ['*'],
+              effect: iam.Effect.ALLOW,
+              actions: ["tag:GetResources"]
+            }),
+          ]
+        }),
+      },
+    });
 
-  //     });
-  // }
+    // role.assumeRolePolicy?.addStatements(
+    //   new iam.PolicyStatement({
+    //     actions: ['sts:AssumeRole'],
+    //     effect: iam.Effect.ALLOW,
+    //     principals: [new iam.ServicePrincipal('grafana.amazonaws.com')],
+    //     conditions:
+    //     {
+    //       "StringEquals": {
+    //         "aws:SourceAccount": `${Stack.of(this).account}`
+    //       },
+    //       "StringLike": {
+    //         "aws:SourceArn": `arn:aws:grafana:${Stack.of(this).region}:${Stack.of(this).account}:/workspaces/*`
+    //       }
+    //     }
+    //   })
+    // );
 
-  createResponseHeaderPolicy1(name: string, pattern: string, stage?: string): cloudfront.CfnResponseHeadersPolicy {
+    return new grafana.CfnWorkspace(this, util.format("%s-%s", Stack.of(this).stackName, "workspace"),
+      {
+        dataSources: ["CLOUDWATCH"],
+        accountAccessType: "CURRENT_ACCOUNT",
+        authenticationProviders: ["AWS_SSO"],
+        organizationalUnits: [orgId!],
+        permissionType: "SERVICE_MANAGED",
+        roleArn: role.roleArn
+      });
+  }
+  createResponseHeaderPolicy1(name: string, pattern: string, stage?: string, originId?: string): cloudfront.CfnResponseHeadersPolicy {
 
     return new cloudfront.CfnResponseHeadersPolicy(this, util.format("%s-%s-%s-cfn", Stack.of(this).stackName, name, stage), {
       responseHeadersPolicyConfig: {
@@ -273,43 +336,10 @@ export class CdkStack extends cdk.Stack {
             {
               header: 'Server-Timing',
               override: false,
-              value: `behavior;desc="${pattern}",stage;desc="${stage}"`,
+              value: `origin;desc="${originId}",behavior;desc="${pattern}",stage;desc="${stage}"`,
             },
           ],
         },
-        // securityHeadersConfig: {
-        //   contentSecurityPolicy: {
-        //     contentSecurityPolicy: 'contentSecurityPolicy',
-        //     override: false,
-        //   },
-        //   contentTypeOptions: {
-        //     override: false,
-        //   },
-        //   frameOptions: {
-        //     frameOption: 'frameOption',
-        //     override: false,
-        //   },
-        //   referrerPolicy: {
-        //     override: false,
-        //     referrerPolicy: 'referrerPolicy',
-        //   },
-        //   strictTransportSecurity: {
-        //     accessControlMaxAgeSec: 123,
-        //     override: false,
-
-        //     // the properties below are optional
-        //     includeSubdomains: false,
-        //     preload: false,
-        //   },
-        //   xssProtection: {
-        //     override: false,
-        //     protection: false,
-
-        //     // the properties below are optional
-        //     modeBlock: false,
-        //     reportUri: 'reportUri',
-        //   },
-        // },
         serverTimingHeadersConfig: {
           enabled: true,
           // the properties below are optional

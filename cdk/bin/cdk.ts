@@ -15,7 +15,7 @@ const cfMonitorStack = new CdkStack(app, stackName, {
   monitorDomainPrefix: process.env.MONITOR_DOMAIN_PREFIX,
   deployStaging: process.env.DEPLOY_STAGING == "TRUE" ? true : false,
   deployMultiCDN: process.env.DEPLOY_MULTICDN == "TRUE" ? true : false,
-
+  organizationalUnitId: process.env.ORG_UNIT_ID,
 } as CdkStackProps);
 
 cdk.Tags.of(cfMonitorStack).add('createdBy', stackName);

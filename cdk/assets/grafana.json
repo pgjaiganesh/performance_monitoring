@@ -22,7 +22,7 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1671200514689,
+  "iteration": 1671398226219,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -746,7 +746,7 @@
             "type": "cloudwatch",
             "uid": "7kalSkc4z"
           },
-          "expression": "fields event_details.env as env\n|filter event_details.metricType='TTFB' and env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.connectionTime,90) as connecttime by env,bin(5m) as event_timestamp\n|display event_timestamp,env,connecttime",
+          "expression": "fields event_details.env as env\n|filter event_details.metricType='TTFB' and env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.connectionTime,${percentile}) as connecttime by env,bin(5m) as event_timestamp\n|display event_timestamp,env,connecttime",
           "id": "",
           "logGroupNames": [
             "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
@@ -761,7 +761,7 @@
           ]
         }
       ],
-      "title": "TLS connect time: ${country}",
+      "title": "TLS connect time(p${percentile}): ${country}",
       "type": "timeseries"
     },
     {
@@ -915,7 +915,7 @@
             "type": "cloudwatch",
             "uid": "7kalSkc4z"
           },
-          "expression": "fields metadata.countryCode as countryCode\n|filter event_type='cdn_metrics' and event_details.initiatorType='navigation'\n|filter countryCode in [${country:singlequote}]\n|stats count() as edgePageViews by bin(5m) as event_timestmap,event_details.sthcdnpop",
+          "expression": "fields metadata.countryCode as countryCode\n|filter event_type='cdn_metrics' and event_details.initiatorType='navigation'\n|filter countryCode in [${country:singlequote}]\n|stats count() as pageViews by bin(5m) as event_timestmap,event_details.sthcdnpop",
           "id": "",
           "logGroupNames": [
             "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
@@ -1262,7 +1262,7 @@
             "type": "cloudwatch",
             "uid": "7kalSkc4z"
           },
-          "expression": "filter event_details.metricType='FCP'and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.value,90) as fcp by event_details.metricType,event_details.env,bin(1m) as event_timestamp\n|display event_timestamp,event_details.env,fcp",
+          "expression": "filter event_details.metricType='FCP'and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.value,${percentile}) as fcp by event_details.metricType,event_details.env,bin(1m) as event_timestamp\n|display event_timestamp,event_details.env,fcp",
           "id": "",
           "logGroupNames": [
             "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
@@ -1282,7 +1282,7 @@
             "type": "cloudwatch",
             "uid": "7kalSkc4z"
           },
-          "expression": "filter event_details.metricType='LCP' and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.value,90) as lcp by event_details.metricType,event_details.env,bin(1m) as event_timestamp\n|display event_timestamp,event_details.env,lcp",
+          "expression": "filter event_details.metricType='LCP' and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.value,${percentile}) as lcp by event_details.metricType,event_details.env,bin(1m) as event_timestamp\n|display event_timestamp,event_details.env,lcp",
           "hide": false,
           "id": "",
           "logGroupNames": [
@@ -1299,7 +1299,7 @@
           ]
         }
       ],
-      "title": "FCP & LCP by environment: ${country}",
+      "title": "FCP & LCP by environment (p${percentile}): ${country}",
       "type": "timeseries"
     },
     {
@@ -1448,7 +1448,7 @@
             "type": "cloudwatch",
             "uid": "7kalSkc4z"
           },
-          "expression": "fields event_details.env as env\n|filter event_details.metricType='TTFB' and env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.value,90) as ttfb by env,bin(5m) as event_timestamp\n|display event_timestamp,env,ttfb",
+          "expression": "fields event_details.env as env\n|filter event_details.metricType='TTFB' and env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.value,${percentile}) as ttfb by env,bin(5m) as event_timestamp\n|display event_timestamp,env,ttfb",
           "id": "",
           "logGroupNames": [
             "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
@@ -1463,7 +1463,7 @@
           ]
         }
       ],
-      "title": "TTFB: ${country}",
+      "title": "TTFB (p${percentile}): ${country}",
       "type": "timeseries"
     },
     {
@@ -1543,7 +1543,7 @@
             "type": "cloudwatch",
             "uid": "7kalSkc4z"
           },
-          "expression": "fields event_details.env as env\n|filter event_details.metricType='TTFB' and env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.connectionTime,90) as connecttime by env,bin(5m) as event_timestamp\n|display event_timestamp,env,connecttime",
+          "expression": "fields event_details.env as env\n|filter event_details.metricType='TTFB' and env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.connectionTime,${percentile}) as connecttime by env,bin(5m) as event_timestamp\n|display event_timestamp,env,connecttime",
           "id": "",
           "logGroupNames": [
             "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
@@ -1558,7 +1558,7 @@
           ]
         }
       ],
-      "title": "TLS connect time: ${country}",
+      "title": "TLS connect time (p${percentile}): ${country}",
       "type": "timeseries"
     },
     {
@@ -1738,7 +1738,7 @@
             "type": "cloudwatch",
             "uid": "7kalSkc4z"
           },
-          "expression": "fields event_details.env as env\n|filter event_details.initiatorType='img' and env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.value,90) as ttfb by env,bin(5m) as event_timestamp\n|display event_timestamp,env,ttfb",
+          "expression": "fields event_details.env as env\n|filter event_details.initiatorType='img' and env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.requestTime,${percentile}) as ttfb by env,bin(5m) as event_timestamp\n|display event_timestamp,env,ttfb",
           "id": "",
           "logGroupNames": [
             "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
@@ -1753,7 +1753,7 @@
           ]
         }
       ],
-      "title": "TTFB: ${country}",
+      "title": "TTFB (p${percentile}): ${country}",
       "type": "timeseries"
     },
     {
@@ -2069,7 +2069,7 @@
             "type": "cloudwatch",
             "uid": "7kalSkc4z"
           },
-          "expression": "fields event_details.env as env\n|filter event_details.initiatorType='script' and env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.value,90) as ttfb by env,bin(5m) as event_timestamp\n|display event_timestamp,env,ttfb",
+          "expression": "fields event_details.env as env\n|filter (event_details.initiatorType='script' or event_details.initiatorType='other') and env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.requestTime,${percentile}) as ttfb by env,bin(5m) as event_timestamp\n|display event_timestamp,env,ttfb",
           "id": "",
           "logGroupNames": [
             "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
@@ -2084,7 +2084,7 @@
           ]
         }
       ],
-      "title": "TTFB: ${country}",
+      "title": "TTFB (p${percentile}): ${country}",
       "type": "timeseries"
     },
     {
@@ -2482,7 +2482,7 @@
             "type": "cloudwatch",
             "uid": "7kalSkc4z"
           },
-          "expression": "fields event_details.env as env\n|filter event_details.initiatorType='link' and env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.value,90) as ttfb by env,bin(5m) as event_timestamp\n|display event_timestamp,env,ttfb",
+          "expression": "fields event_details.env as env\n|filter event_details.initiatorType='link' and env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.value,${percentile}) as ttfb by env,bin(5m) as event_timestamp\n|display event_timestamp,env,ttfb",
           "id": "",
           "logGroupNames": [
             "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
@@ -2497,7 +2497,7 @@
           ]
         }
       ],
-      "title": "TTFB: ${country}",
+      "title": "TTFB (p${percentile}): ${country}",
       "type": "timeseries"
     },
     {
@@ -2719,7 +2719,7 @@
       "type": "stat"
     }
   ],
-  "refresh": "1m",
+  "refresh": "",
   "schemaVersion": 35,
   "style": "dark",
   "tags": [],
@@ -2858,9 +2858,9 @@
       },
       {
         "current": {
-          "selected": false,
-          "text": "50",
-          "value": "50"
+          "selected": true,
+          "text": "75",
+          "value": "75"
         },
         "hide": 0,
         "includeAll": false,
@@ -2873,12 +2873,12 @@
             "value": "10"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "50",
             "value": "50"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "75",
             "value": "75"
           },
@@ -2913,6 +2913,6 @@
   "timezone": "",
   "title": "Observability: Website Performance",
   "uid": "FL-7Nz5Vk",
-  "version": 68,
+  "version": 78,
   "weekStart": ""
 }
