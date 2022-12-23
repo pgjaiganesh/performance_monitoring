@@ -65,11 +65,14 @@ export class CdkStack extends cdk.Stack {
       defaultTtl: Duration.seconds(30),
     });
 
-    let cfFunction = new cloudfront.Function(this, "CDNRandomizer", {
-      code: cloudfront.FunctionCode.fromFile({
-        filePath: path.join(__dirname, '../src/cloudfront-functions/viewer-response/index.js')
-      })
-    });
+    let cfFunction: cloudfront.Function;
+    if (props?.deployMultiCDN) {
+      cfFunction = new cloudfront.Function(this, "CDNRandomizer", {
+        code: cloudfront.FunctionCode.fromFile({
+          filePath: path.join(__dirname, '../src/cloudfront-functions/viewer-response/index.js')
+        })
+      });
+    }
 
     let envProd = "prod";
     let defaultResponseHeaderPolicies = [this.createResponseHeaderPolicy1("default", "default", envProd, originId)];
@@ -84,7 +87,7 @@ export class CdkStack extends cdk.Stack {
           this, util.format("%s-%s-%s", Stack.of(this).stackName, "default", envProd), defaultResponseHeaderPolicies[0].attrId),
         ...(props?.deployMultiCDN && {
           functionAssociations: [{
-            function: cfFunction,
+            function: cfFunction!,
             eventType: cloudfront.FunctionEventType.VIEWER_RESPONSE,
           }]
         }),

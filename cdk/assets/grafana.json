@@ -22,7 +22,7 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1671398226219,
+  "iteration": 1671808420352,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -77,7 +77,38 @@
           },
           "unit": "percentunit"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/prod/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/stage/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 5,
@@ -159,7 +190,38 @@
           },
           "unit": "percentunit"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/prod/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/stage/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 5,
@@ -231,12 +293,46 @@
         "overrides": [
           {
             "matcher": {
-              "id": "byFrameRefID",
-              "options": "Global"
+              "id": "byRegexp",
+              "options": "/prod/"
             },
             "properties": [
               {
-                "id": "color"
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/stage/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/Global/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "purple",
+                  "mode": "fixed"
+                }
               }
             ]
           }
@@ -856,7 +952,7 @@
               "tooltip": false,
               "viz": false
             },
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -915,7 +1011,7 @@
             "type": "cloudwatch",
             "uid": "7kalSkc4z"
           },
-          "expression": "fields metadata.countryCode as countryCode\n|filter event_type='cdn_metrics' and event_details.initiatorType='navigation'\n|filter countryCode in [${country:singlequote}]\n|stats count() as pageViews by bin(5m) as event_timestmap,event_details.sthcdnpop",
+          "expression": "fields metadata.countryCode as countryCode\n|filter event_type='cdn_metrics' and event_details.initiatorType='navigation' and event_details.env in [${environment:singlequote}] \n|filter countryCode in [${country:singlequote}]\n|stats count() as pageViews by bin(5m) as event_timestmap,event_details.sthcdnpop",
           "id": "",
           "logGroupNames": [
             "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
@@ -2913,6 +3009,6 @@
   "timezone": "",
   "title": "Observability: Website Performance",
   "uid": "FL-7Nz5Vk",
-  "version": 78,
+  "version": 82,
   "weekStart": ""
 }

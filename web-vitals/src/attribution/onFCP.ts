@@ -37,6 +37,7 @@ const attributeFCP = (metric: FCPMetric): void => {
         loadState: getLoadState(metric.entries[0].startTime),
         // navigationEntry,
         cdn: cdnCacheStatus.cdn,
+        // if stage is not defined. take default as 'prod'
         env: env ? env.description : "prod",
         name: navigationEntry.name,
         metricType: metric.name,

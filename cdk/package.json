@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@aws-cdk/aws-grafana": "^1.183.0",
-    "aws-cdk-lib": "2.55.1",
+    "aws-cdk-lib": "2.56.0",
     "constructs": "^10.0.0",
     "source-map-support": "^0.5.21"
   }
