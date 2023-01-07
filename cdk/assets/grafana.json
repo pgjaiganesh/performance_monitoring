@@ -22,7 +22,7 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1671808420352,
+  "iteration": 1672347316650,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -102,7 +102,7 @@
               {
                 "id": "color",
                 "value": {
-                  "fixedColor": "orange",
+                  "fixedColor": "blue",
                   "mode": "fixed"
                 }
               }
@@ -141,7 +141,7 @@
           "expression": "fields event_details.env as env1\n|filter event_type='cdn_metrics' and (event_details.metricType='TTFB' or event_details.metricType='RESOURCE') and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}] \n|stats COALESCE(count(event_details.sthcdncachemiss),0) as cachemiss,COALESCE(count(event_details.sthcdncachehit),0) as cachehit by bin(5m) as event_timestamp,env1\n|display event_timestamp,env1,cachehit/(cachehit+cachemiss)",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -215,7 +215,7 @@
               {
                 "id": "color",
                 "value": {
-                  "fixedColor": "orange",
+                  "fixedColor": "blue",
                   "mode": "fixed"
                 }
               }
@@ -254,7 +254,7 @@
           "expression": "filter event_type=\"cdn_metrics\" and (event_details.initiatorType=\"navigation\" or event_details.initiatorType=\"script\" or event_details.initiatorType=\"link\" ) and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats avg(event_details.compressRate) as compression by event_details.env,bin(5m) as event_timestamp\n|display event_timestamp,event_details.env,compression",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -315,7 +315,7 @@
               {
                 "id": "color",
                 "value": {
-                  "fixedColor": "orange",
+                  "fixedColor": "blue",
                   "mode": "fixed"
                 }
               }
@@ -369,7 +369,7 @@
           "expression": "fields concat(event_details.env,'-',metadata.countryCode) as env\n|filter event_type='cdn_metrics' and event_details.initiatorType='navigation' and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats count() as pageViews by bin(5m) as event_timestamp,env\n|sort pageViews desc",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -426,7 +426,38 @@
           },
           "unit": "bytes"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/prod/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/stage/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 5,
@@ -459,7 +490,7 @@
           "expression": "filter event_type=\"cdn_metrics\" and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats sum(event_details.transferSize) as transferSize by event_details.env,bin(5m) as event_timestamp\n|display event_timestamp,event_details.env,transferSize",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -495,7 +526,38 @@
           },
           "unit": "short"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/prod/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/stage/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 13,
@@ -528,7 +590,7 @@
           "expression": "fields concat(event_details.env,'-',metadata.deviceType) as env\n|filter event_type='cdn_metrics' and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats count() as deviceCount by bin(5m) as event_timestamp,env,metadata.countryCode\n|display event_timestamp,env,deviceCount",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -568,7 +630,38 @@
           },
           "unit": "ms"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/prod/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/stage/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 4,
@@ -652,7 +745,38 @@
           },
           "unit": "percentunit"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/prod/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/stage/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -681,7 +805,7 @@
           "expression": "filter event_type='cdn_metrics' \n|filter event_details.metricType='RESOURCE' or event_details.metricType='TTFB' \n|filter event_details.env in [${environment:singlequote}]  and metadata.countryCode in [${country:singlequote}]\n|stats count(event_details.sthcdncachehit) as cachehit,count(event_details.sthcdncachemiss) as cachemiss,cachehit/(cachemiss+cachehit) as chr by event_details.sthbehavior as behavior,event_details.env\n|display behavior,event_details.env,chr\n|sort behavior",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -717,7 +841,38 @@
           },
           "unit": "decbytes"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/prod/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/stage/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 4,
@@ -845,7 +1000,7 @@
           "expression": "fields event_details.env as env\n|filter event_details.metricType='TTFB' and env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.connectionTime,${percentile}) as connecttime by env,bin(5m) as event_timestamp\n|display event_timestamp,env,connecttime",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -1014,7 +1169,7 @@
           "expression": "fields metadata.countryCode as countryCode\n|filter event_type='cdn_metrics' and event_details.initiatorType='navigation' and event_details.env in [${environment:singlequote}] \n|filter countryCode in [${country:singlequote}]\n|stats count() as pageViews by bin(5m) as event_timestmap,event_details.sthcdnpop",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -1077,7 +1232,7 @@
           "expression": "filter event_type='cdn_metrics' and metadata.countryCode in [${country:singlequote}] and event_details.env in [${environment:singlequote}]\n|stats sum(event_details.transferSize) as totalBytes by event_details.sthcdnpop as PoP\n|display PoP,totalBytes\n|sort totalBytes desc\n|limit 10",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -1162,7 +1317,41 @@
           },
           "unit": "percentunit"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/prod/"
+            },
+            "properties": [
+              {
+                "id": "color"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/stage/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 5,
@@ -1195,7 +1384,7 @@
           "expression": "fields event_details.env as env1\n|filter event_type='cdn_metrics' and (event_details.initiatorType='navigation') and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}] \n|stats COALESCE(count(event_details.sthcdncachemiss),0) as cachemiss,COALESCE(count(event_details.sthcdncachehit),0) as cachehit by bin(5m) as event_timestamp,env1\n|display event_timestamp,env1,cachehit/(cachehit+cachemiss)",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -1233,7 +1422,38 @@
           },
           "unit": "percentunit"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/prod/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/stage/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 5,
@@ -1266,7 +1486,7 @@
           "expression": "filter event_type=\"cdn_metrics\" and (event_details.initiatorType=\"navigation\") and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats avg(event_details.compressRate) as compression by event_details.env,bin(5m) as event_timestamp\n|display event_timestamp,event_details.env,compression",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -1361,7 +1581,7 @@
           "expression": "filter event_details.metricType='FCP'and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.value,${percentile}) as fcp by event_details.metricType,event_details.env,bin(1m) as event_timestamp\n|display event_timestamp,event_details.env,fcp",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -1418,7 +1638,38 @@
           },
           "unit": "decbytes"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/prod/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/stage/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 4,
@@ -1451,7 +1702,7 @@
           "expression": "filter event_type='cdn_metrics' and event_details.initiatorType='navigation' and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats sum(event_details.transferSize) as transferSize, count() as totalRequests by event_details.env,bin(5m) as event_timestamp\n|display event_timestamp,event_details.env,transferSize/totalRequests ",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -1547,7 +1798,7 @@
           "expression": "fields event_details.env as env\n|filter event_details.metricType='TTFB' and env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.value,${percentile}) as ttfb by env,bin(5m) as event_timestamp\n|display event_timestamp,env,ttfb",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -1642,7 +1893,7 @@
           "expression": "fields event_details.env as env\n|filter event_details.metricType='TTFB' and env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.connectionTime,${percentile}) as connecttime by env,bin(5m) as event_timestamp\n|display event_timestamp,env,connecttime",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -1708,7 +1959,38 @@
           },
           "unit": "percentunit"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/prod/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/stage/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 5,
@@ -1741,7 +2023,7 @@
           "expression": "fields event_details.env as env1\n|filter event_type='cdn_metrics' and (event_details.initiatorType='img') and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}] \n|stats COALESCE(count(event_details.sthcdncachemiss),0) as cachemiss,COALESCE(count(event_details.sthcdncachehit),0) as cachehit by bin(5m) as event_timestamp,env1\n|display event_timestamp,env1,cachehit/(cachehit+cachemiss)",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -1810,8 +2092,8 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
-        "w": 12,
+        "h": 14,
+        "w": 13,
         "x": 5,
         "y": 55
       },
@@ -1837,7 +2119,7 @@
           "expression": "fields event_details.env as env\n|filter event_details.initiatorType='img' and env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.requestTime,${percentile}) as ttfb by env,bin(5m) as event_timestamp\n|display event_timestamp,env,ttfb",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -1872,7 +2154,38 @@
           },
           "unit": "bytes"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/prod/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/stage/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 5,
@@ -1905,7 +2218,7 @@
           "expression": "filter event_type='cdn_metrics' and event_details.initiatorType='img' and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats sum(event_details.transferSize) as transferSize by event_details.env,bin(5m) as event_timestamp\n|display event_timestamp,event_details.env,transferSize",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -1940,7 +2253,38 @@
           },
           "unit": "decbytes"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/prod/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/stage/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 4,
@@ -1973,7 +2317,7 @@
           "expression": "filter event_type='cdn_metrics' and event_details.initiatorType='img' and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats sum(event_details.transferSize) as transferSize, count() as totalRequests by event_details.env,bin(5m) as event_timestamp\n|display event_timestamp,event_details.env,transferSize/totalRequests ",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -2039,7 +2383,38 @@
           },
           "unit": "percentunit"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/prod/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/stage/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 7,
@@ -2072,7 +2447,7 @@
           "expression": "fields event_details.env as env1\n|filter event_type='cdn_metrics' and (event_details.initiatorType='script') and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}] \n|stats COALESCE(count(event_details.sthcdncachemiss),0) as cachemiss,COALESCE(count(event_details.sthcdncachehit),0) as cachehit by bin(5m) as event_timestamp,env1\n|display event_timestamp,env1,cachehit/(cachehit+cachemiss)",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -2168,7 +2543,7 @@
           "expression": "fields event_details.env as env\n|filter (event_details.initiatorType='script' or event_details.initiatorType='other') and env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.requestTime,${percentile}) as ttfb by env,bin(5m) as event_timestamp\n|display event_timestamp,env,ttfb",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -2203,7 +2578,38 @@
           },
           "unit": "bytes"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/prod/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/stage/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 6,
@@ -2236,7 +2642,7 @@
           "expression": "filter event_type='cdn_metrics' and event_details.initiatorType='script' and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats sum(event_details.transferSize) as transferSize by event_details.env,bin(5m) as event_timestamp\n|display event_timestamp,event_details.env,transferSize",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -2271,7 +2677,38 @@
           },
           "unit": "decbytes"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/prod/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/stage/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 5,
@@ -2304,7 +2741,7 @@
           "expression": "filter event_type='cdn_metrics' and event_details.initiatorType='script' and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats sum(event_details.transferSize) as transferSize, count() as totalRequests by event_details.env,bin(5m) as event_timestamp\n|display event_timestamp,event_details.env,transferSize/totalRequests ",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -2353,7 +2790,38 @@
           },
           "unit": "percentunit"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/prod/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/stage/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 5,
@@ -2386,7 +2854,7 @@
           "expression": "filter event_type='cdn_metrics' and (event_details.initiatorType='script') and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats avg(event_details.compressRate) as compression by event_details.env,bin(5m) as event_timestamp\n|display event_timestamp,event_details.env,compression",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -2452,7 +2920,38 @@
           },
           "unit": "percentunit"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/prod/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/stage/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 7,
@@ -2485,7 +2984,7 @@
           "expression": "fields event_details.env as env1\n|filter event_type='cdn_metrics' and (event_details.initiatorType='link') and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}] \n|stats COALESCE(count(event_details.sthcdncachemiss),0) as cachemiss,COALESCE(count(event_details.sthcdncachehit),0) as cachehit by bin(5m) as event_timestamp,env1\n|display event_timestamp,env1,cachehit/(cachehit+cachemiss)",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -2581,7 +3080,7 @@
           "expression": "fields event_details.env as env\n|filter event_details.initiatorType='link' and env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.value,${percentile}) as ttfb by env,bin(5m) as event_timestamp\n|display event_timestamp,env,ttfb",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -2616,7 +3115,38 @@
           },
           "unit": "bytes"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/prod/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/stage/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 6,
@@ -2649,7 +3179,7 @@
           "expression": "filter event_type='cdn_metrics' and event_details.initiatorType='link' and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats sum(event_details.transferSize) as transferSize by event_details.env,bin(5m) as event_timestamp\n|display event_timestamp,event_details.env,transferSize",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -2684,7 +3214,38 @@
           },
           "unit": "decbytes"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/prod/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/stage/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 5,
@@ -2717,7 +3278,7 @@
           "expression": "filter event_type='cdn_metrics' and event_details.initiatorType='link' and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats sum(event_details.transferSize) as transferSize, count() as totalRequests by event_details.env,bin(5m) as event_timestamp\n|display event_timestamp,event_details.env,transferSize/totalRequests ",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -2766,7 +3327,38 @@
           },
           "unit": "percentunit"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/prod/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/stage/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 5,
@@ -2799,7 +3391,7 @@
           "expression": "filter event_type='cdn_metrics' and (event_details.initiatorType='link') and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats avg(event_details.compressRate) as compression by event_details.env,bin(5m) as event_timestamp\n|display event_timestamp,event_details.env,compression",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -2908,14 +3500,9 @@
             "selected": false,
             "text": "IE",
             "value": "IE"
-          },
-          {
-            "selected": false,
-            "text": "ZA",
-            "value": "ZA"
           }
         ],
-        "query": "US,NL,DE,GB,IN,ES,SE,IE,ZA",
+        "query": "US,NL,DE,GB,IN,ES,SE,IE",
         "queryValue": "",
         "skipUrlSync": false,
         "type": "custom"
@@ -2998,6 +3585,13 @@
         "queryValue": "",
         "skipUrlSync": false,
         "type": "custom"
+      },
+      {
+        "hide": 2,
+        "name": "log_group",
+        "query": "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06",
+        "skipUrlSync": false,
+        "type": "constant"
       }
     ]
   },
@@ -3009,6 +3603,6 @@
   "timezone": "",
   "title": "Observability: Website Performance",
   "uid": "FL-7Nz5Vk",
-  "version": 82,
+  "version": 98,
   "weekStart": ""
 }
