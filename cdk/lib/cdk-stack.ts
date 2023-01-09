@@ -299,6 +299,7 @@ export class CdkStack extends cdk.Stack {
 
     return new grafana.CfnWorkspace(this, util.format("%s-%s", Stack.of(this).stackName, "workspace"),
       {
+        name: util.format("%s-%s", Stack.of(this).stackName, "workspace"),
         dataSources: ["CLOUDWATCH"],
         accountAccessType: "CURRENT_ACCOUNT",
         authenticationProviders: ["AWS_SSO"],

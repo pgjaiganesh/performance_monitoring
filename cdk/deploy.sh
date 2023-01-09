@@ -12,5 +12,6 @@ export ORG_UNIT_ID=""
 # export DEPLOY_MULTICDN="FALSE"
 # AWS Region to deploy the solution
 export CDK_DEPLOY_REGION=""
+npm install
 npx cdk bootstrap --profile $AWS_PROFILE
 npx cdk deploy --profile $AWS_PROFILE
