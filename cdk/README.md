@@ -24,6 +24,8 @@ CloudFront, CloudWatch RUM, CloudWatch Logs, Amazon Grafana, AWS Identity Center
 1. Change into the directory and run below commands
     - `cd performance_monitoring/web-vitals`
     - `npm install`
+    - `npm audit fix`
+    - `npm run build`
 
 1. Change into the directory and run below commands
     - `cd performance_monitoring/cdk`

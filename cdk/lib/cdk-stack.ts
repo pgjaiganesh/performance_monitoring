@@ -35,7 +35,7 @@ export class CdkStack extends cdk.Stack {
       });
 
     const deployment = new s3deploy.BucketDeployment(this, "s3deploy", {
-      sources: [s3deploy.Source.asset(path.join(__dirname, '/../../frontend/'))],
+      sources: [s3deploy.Source.asset(path.join(__dirname, '/../../web-vitals/dist/'))],
       destinationBucket: s3Bucket,
       destinationKeyPrefix: "measure/"
     });
