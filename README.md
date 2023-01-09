@@ -49,7 +49,7 @@ export ORG_UNIT_ID=''
 export CDK_DEPLOY_REGION=''
 ```
 
-1. Run `deploy.sh`
+6. Run `deploy.sh`
 
 ## Post deployment steps
 
