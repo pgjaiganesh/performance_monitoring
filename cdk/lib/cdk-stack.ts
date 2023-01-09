@@ -23,7 +23,7 @@ export interface CdkStackProps extends StackProps {
   // deployStaging: boolean;
   // deployMultiCDN: boolean;
   organizationalUnitId: string;
-}
+};
 
 export class CdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: CdkStackProps) {
