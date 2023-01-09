@@ -14,7 +14,7 @@ CloudFront, CloudWatch RUM, CloudWatch Logs, Amazon Grafana, AWS Identity Center
 
 ## Architecture 
 
-![CloudFront Performance](./images/cf-rum.png)
+![CloudFront Performance](/images/cf-rum.png)
 
 
 ## Steps to build
@@ -58,11 +58,11 @@ export CDK_DEPLOY_REGION=''
 1. Navigate to CloudFront console and open the distribution config from the list to modify.
 
 1. Navigate to Behaviors tab and edit
-![CloudFront Behavior](./images/cf-distribution1.jpg)
+![CloudFront Behavior](/images/cf-distribution1.jpg)
 
 1. Assign the Origin Response Policy to the one created during deployment (pattern region-sth-tao-policy) This policy enables ‘Server-Timing’ and ‘Timing-Allow-Origin’ headers for this behavior and *Save Changes*
 
-![CloudFront Behavior Update](./images/cf-distribution2.jpg)
+![CloudFront Behavior Update](/images/cf-distribution2.jpg)
 
 1. Repeat step2 for other cache behaviors.
 
@@ -74,39 +74,39 @@ export CDK_DEPLOY_REGION=''
 
 1. *Open* the RUM config created visible in the list view
 
-![CloudWatch RUM](./images/cw-rum1.jpg)
+![CloudWatch RUM](/images/cw-rum1.jpg)
 
 1. *Edit* the config
 
-![CloudWatch RUM](./images/cw-rum2.jpg)
+![CloudWatch RUM](/images/cw-rum2.jpg)
 
 1. Select *includeSubdomains* - needed it we are serving images, css, js from another subdomain from the one configured in variables during deployment.
 
-![CloudWatch RUM](./images/cw-rum3.jpg)
+![CloudWatch RUM](/images/cw-rum3.jpg)
 
 1. Select *Other Data* - needed for custom events to be captured.
 
-![CloudWatch RUM](./images/cw-rum4.jpg)
+![CloudWatch RUM](/images/cw-rum4.jpg)
 
 1. *Save* the config.
 
 1. Navigate to ‘Configuration→ General configuration’ and take a note of the CloudWatch Log group name. We will need this during the Grafana dashboard setup phase.
 
-![CloudWatch RUM](./images/cw-rum5.jpg)
+![CloudWatch RUM](/images/cw-rum5.jpg)
 
 1. Navigate to ‘Configuration→ Javascript snippet’ and select ‘HTML’ from the Sample code panel. Copy the code snippet into a text file, we will need this during integration into application pages.
 
-![CloudWatch RUM](./images/cw-rum6.jpg)
+![CloudWatch RUM](/images/cw-rum6.jpg)
 
 ## Client side Instrumentation
 
 In the head section of HTML page, place the above code snippet and the measure.js file (located in the S3 bucket created)
-![CloudWatch RUM](./images/client1.jpg)
+![CloudWatch RUM](/images/client1.jpg)
 
 ## IAM Identity Center ( AWS SSO)
 
 1. From AWS console, navigate to IAM Identity Center → Users
-![AWS Organization](./images/org1.jpg)
+![AWS Organization](/images/org1.jpg)
 
 1. Create a new user and verify the email.
 
@@ -116,38 +116,38 @@ In the head section of HTML page, place the above code snippet and the measure.j
 
 1. Open the grafana workspace created.
 
-![Grafana](./images/grafana1.jpg)
+![Grafana](/images/grafana1.jpg)
 
 1. Assign the user created as 'Admin' user.
 
 1. Navigate to *Grafana workspace URL*
-![Grafana](./images/grafana2.jpg)
+![Grafana](/images/grafana2.jpg)
 
 1. Login with user credentials.
-![Grafana](./images/grafana3.jpg)
+![Grafana](/images/grafana3.jpg)
 
 1. Once logged in, from left hand menu, move to *Gear Icon* → Data Sources.
-![Grafana](./images/grafana4.jpg)
+![Grafana](/images/grafana4.jpg)
 
 1. On the configuration page click *‘Add data source’*
-![Grafana](./images/grafana5.jpg)
+![Grafana](/images/grafana5.jpg)
 
 1. On the ‘Add data source’ page search for ‘cloudwatch’ and select it.
-![Grafana](./images/grafana6.jpg)
+![Grafana](/images/grafana6.jpg)
 
 1. In the CloudWatch data source configuration page. select the ‘Default Region’ where you deployed your application. Click ‘Save & test’ once done.
-![Grafana](./images/grafana7.jpg)
+![Grafana](/images/grafana7.jpg)
 
 1. Download ‘assets/grafana.json’ file from the repository. Edit in your favorite editor and replace at line 3592 the Cloudwatch log group name we noted in the CloudWatch RUM section. Save the file.
 
 1. From Grafanaleft hand menu, move to ‘+’ → Import 
-![Grafana](./images/grafana8.jpg)
+![Grafana](/images/grafana8.jpg)
 
 1. *Import* the modified grafana.json file
-![Grafana](./images/grafana9.jpg)
+![Grafana](/images/grafana9.jpg)
 
 1. Select ‘CloudWatch’ as data source.
-![Grafana](./images/grafana10.jpg)
+![Grafana](/images/grafana10.jpg)
 
 and click *‘Import’*
 
