@@ -100,8 +100,8 @@ export CDK_DEPLOY_REGION=''
 
 ## Client side Instrumentation
 
-In the head section of HTML page, place the above code snippet and the measure.js file (located in the S3 bucket created)
-![CloudWatch RUM](/images/client1.jpg)
+In the head section of HTML page, place the above code snippet and the web-vitals.attribution.js file (located in the S3 bucket created)
+![CloudWatch RUM](/images/client2.jpg)
 
 ## IAM Identity Center ( AWS SSO)
 
