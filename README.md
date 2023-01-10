@@ -103,6 +103,9 @@ export CDK_DEPLOY_REGION=''
 In the head section of HTML page, place the above code snippet and the web-vitals.attribution.js file (located in the S3 bucket created)
 ![CloudWatch RUM](/images/client3.png)
 
+A sample HTML page can be found  
+[here, line 3 - 27](/frontend/indexv1.html)
+
 ## IAM Identity Center ( AWS SSO)
 
 1. From AWS console, navigate to IAM Identity Center → Users
