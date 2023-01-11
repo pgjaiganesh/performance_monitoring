@@ -2,6 +2,8 @@
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { CdkStack, CdkStackProps } from '../lib/cdk-stack';
+import { Aspects } from 'aws-cdk-lib';
+import { AwsSolutionsChecks } from 'cdk-nag'
 
 const app = new cdk.App();
 // const stackName = "MultiCDNMonitorStack";
@@ -19,3 +21,4 @@ const cfMonitorStack = new CdkStack(app, stackName, {
 } as CdkStackProps);
 
 cdk.Tags.of(cfMonitorStack).add('createdBy', stackName);
+Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }))

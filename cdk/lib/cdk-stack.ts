@@ -14,6 +14,7 @@ import { aws_rum as rum } from 'aws-cdk-lib';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as grafana from 'aws-cdk-lib/aws-grafana';
+import { NagSuppressions } from 'cdk-nag'
 
 export interface CdkStackProps extends StackProps {
   // hostedZoneId: any;
@@ -29,127 +30,55 @@ export class CdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: CdkStackProps) {
     super(scope, id, props);
 
+    NagSuppressions.addStackSuppressions(this, [
+      {
+        id: 'AwsSolutions-IAM4',
+        reason: 'S3 Bucket deployment is a standard CDK construct with visible controls to refine the policies.',
+      },
+      {
+        id: 'AwsSolutions-IAM5',
+        reason: 'S3 Bucket deployment is a standard CDK construct with visible controls to refine the policies.',
+      },
+    ]);
+
     let s3Bucket = new s3.Bucket(this, "s3",
       {
         removalPolicy: RemovalPolicy.DESTROY,
+        blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+        encryption: s3.BucketEncryption.S3_MANAGED,
+        enforceSSL: true,
       });
 
+    NagSuppressions.addResourceSuppressions(s3Bucket, [
+      {
+        id: 'AwsSolutions-S1',
+        reason: 'S3 Bucket access logs may not be required as its a origin to CloudFront where we recommend to turn on logging.',
+      },
+    ]);
     const deployment = new s3deploy.BucketDeployment(this, "s3deploy", {
       sources: [s3deploy.Source.asset(path.join(__dirname, '/../../web-vitals/dist/'))],
       destinationBucket: s3Bucket,
-      destinationKeyPrefix: "measure/"
+      destinationKeyPrefix: "measure/",
     });
-
-    // let route53Construct = new R53Construct(this, "route53", {
-    //   domainName: props?.domainName,
-    //   hostedZoneId: props?.hostedZoneId,
-    // });
-
-    // let fqdn = `${props?.monitorDomainPrefix}.${props?.domainName}`;
-    // let cert = new acm.Certificate(this, "cert", {
-    //   domainName: fqdn,
-    //   validation: acm.CertificateValidation.fromDns(route53Construct.portalHostedZone),
-    // });
-
-    let originId = "s3origin";
-    let s3Origin = new origins.S3Origin(s3Bucket, {
-      originId,
-    });
-
-    // let cachePolicy = new cloudfront.CachePolicy(this, "cachePolicy", {
-    //   // headerBehavior: cloudfront.CacheHeaderBehavior.allowList('origin'),
-    //   // queryStringBehavior: cloudfront.CacheQueryStringBehavior.allowList('regionCode', 'serviceCode', 'fromLocation'),
-    //   enableAcceptEncodingBrotli: true,
-    //   enableAcceptEncodingGzip: true,
-    //   minTtl: Duration.seconds(0),
-    //   maxTtl: Duration.seconds(30),
-    //   defaultTtl: Duration.seconds(30),
-    // });
-
-    // let cfFunction: cloudfront.Function;
-    // if (props?.deployMultiCDN) {
-    //   cfFunction = new cloudfront.Function(this, "CDNRandomizer", {
-    //     code: cloudfront.FunctionCode.fromFile({
-    //       filePath: path.join(__dirname, '../src/cloudfront-functions/viewer-response/index.js')
-    //     })
-    //   });
-    // }
 
     let envProd = "prod";
-    let defaultResponseHeaderPolicies = [this.createResponseHeaderPolicy1("default", undefined, envProd)];
-    // let distribution = new cloudfront.Distribution(this, "cf", {
+    this.createResponseHeaderPolicy("default", envProd);
 
-    //   defaultBehavior: {
-    //     origin: s3Origin,
-    //     allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
-    //     cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD_OPTIONS,
-    //     cachePolicy: cachePolicy,
-    //     responseHeadersPolicy: cloudfront.ResponseHeadersPolicy.fromResponseHeadersPolicyId(
-    //       this, util.format("%s-%s-%s", Stack.of(this).stackName, "default", envProd), defaultResponseHeaderPolicies[0].attrId),
-    //     // ...(props?.deployMultiCDN && {
-    //     //   functionAssociations: [{
-    //     //     function: cfFunction!,
-    //     //     eventType: cloudfront.FunctionEventType.VIEWER_RESPONSE,
-    //     //   }]
-    //     // }),
-    //   },
-    //   certificate: cert,
-    //   domainNames: [fqdn],
-    //   httpVersion: cloudfront.HttpVersion.HTTP2,
-    //   comment: util.format("%s_%s_%s", Stack.of(this).stackName, Stack.of(this).region, "Description"),
-    // });
-
-    // let behaviors = [
-    //   {
-    //     name: "css",
-    //     pattern: "*.css"
-    //   },
-    //   {
-    //     name: "js",
-    //     pattern: "*.js"
-    //   },
-    //   {
-    //     name: "images",
-    //     pattern: "/public/images/*"
-    //   }
-    // ];
-
-    // behaviors.map(behavior => {
-    //   // let responseHeaderPolicies = [this.createResponseHeaderPolicy(behavior, behavior),
-    //   // this.createResponseHeaderPolicy(behavior.name, behavior.pattern, "stage");
-    //   // this.createResponseHeaderPolicy1(behavior.name, behavior.pattern, envStage);
-    //   distribution.addBehavior(behavior.pattern, s3Origin, {
-    //     allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
-    //     cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD_OPTIONS,
-    //     cachePolicy: cachePolicy,
-    //     responseHeadersPolicy: cloudfront.ResponseHeadersPolicy.fromResponseHeadersPolicyId(this,
-    //       util.format("%s-%s-%s", Stack.of(this).stackName, behavior.name, envProd), this.createResponseHeaderPolicy1(behavior.name, behavior.pattern, envProd, originId).attrId),
-    //     // ...(props?.deployMultiCDN && {
-    //     //   functionAssociations: [{
-    //     //     function: cfFunction,
-    //     //     eventType: cloudfront.FunctionEventType.VIEWER_RESPONSE,
-    //     //   }]
-    //     // }),
-    //   })
-    // });
-
-    // if (props?.deployStaging) {
     let envStage = "stage";
-    this.createResponseHeaderPolicy1("default", undefined, envStage);
-    // behaviors.map(behavior => {
-    //   // let responseHeaderPolicies = [this.createResponseHeaderPolicy(behavior, behavior),
-    //   // this.createResponseHeaderPolicy(behavior.name, behavior.pattern, "stage");
-    //   this.createResponseHeaderPolicy1(behavior.name, behavior.pattern, envStage, originId);
-    // });
-    // }
-
-    // route53Construct.addCFRecord(distribution, props?.monitorDomainPrefix!);
+    this.createResponseHeaderPolicy("default", envStage);
 
     let identityPool = new cognito.CfnIdentityPool(this, 'rum-idp', {
       identityPoolName: `${Stack.of(this).stackName}-rum-idp`,
       allowUnauthenticatedIdentities: true,
       allowClassicFlow: true,
     });
+
+    NagSuppressions.addResourceSuppressions(identityPool, [
+      {
+        id: 'AwsSolutions-COG7',
+        reason: 'CloudWatch RUM needs Cognito Identity Pool with unauthenticated access',
+      },
+    ]);
 
     let rumMonitorName = `${Stack.of(this).stackName}-rum`;
 
@@ -193,36 +122,16 @@ export class CdkStack extends cdk.Stack {
     let cfnAppMonitor = new rum.CfnAppMonitor(this, 'rum', {
       domain: props?.monitorDomainName,
       name: rumMonitorName,
-      // the properties below are optional
       appMonitorConfiguration: {
         allowCookies: true,
-        // enableXRay: false,
-        // guestRoleArn: 'guestRoleArn',
         identityPoolId: identityPool.ref,
-        // includedPages: ['includedPages'],
-        // metricDestinations: [{
-        //   destination: 'destination',
 
-        //   // the properties below are optional
-        //   destinationArn: 'destinationArn',
-        //   iamRoleArn: 'iamRoleArn',
-        //   metricDefinitions: [{
-        //     name: 'name',
-
-        //     // the properties below are optional
-        //     dimensionKeys: {
-        //       dimensionKeysKey: 'dimensionKeys',
-        //     },
-        //     eventPattern: 'eventPattern',
-        //     unitLabel: 'unitLabel',
-        //     valueKey: 'valueKey',
-        //   }],
-        // }],
         sessionSampleRate: 1,
         telemetries: ['http', 'errors'],
       },
       cwLogEnabled: true,
     });
+
     this.createGrafanaWorkspace(props?.organizationalUnitId);
   }
 
@@ -244,6 +153,7 @@ export class CdkStack extends cdk.Stack {
           statements: [
             new iam.PolicyStatement({
               resources: ['*'],
+              // resources: [`arn:aws:logs:${Stack.of(this).region}:${Stack.of(this).account}:log-group:/aws/vendedlogs/*:*`],
               effect: iam.Effect.ALLOW,
               actions: ["cloudwatch:DescribeAlarmsForMetric",
                 "cloudwatch:DescribeAlarmHistory",
@@ -255,6 +165,7 @@ export class CdkStack extends cdk.Stack {
             }),
             new iam.PolicyStatement({
               resources: ['*'],
+              // resources: [`arn:aws:logs:${Stack.of(this).region}:${Stack.of(this).account}:log-group:/aws/vendedlogs/*:*`],
               effect: iam.Effect.ALLOW,
               actions: ["logs:DescribeLogGroups",
                 "logs:GetLogGroupFields",
@@ -280,22 +191,12 @@ export class CdkStack extends cdk.Stack {
       },
     });
 
-    // role.assumeRolePolicy?.addStatements(
-    //   new iam.PolicyStatement({
-    //     actions: ['sts:AssumeRole'],
-    //     effect: iam.Effect.ALLOW,
-    //     principals: [new iam.ServicePrincipal('grafana.amazonaws.com')],
-    //     conditions:
-    //     {
-    //       "StringEquals": {
-    //         "aws:SourceAccount": `${Stack.of(this).account}`
-    //       },
-    //       "StringLike": {
-    //         "aws:SourceArn": `arn:aws:grafana:${Stack.of(this).region}:${Stack.of(this).account}:/workspaces/*`
-    //       }
-    //     }
-    //   })
-    // );
+    NagSuppressions.addResourceSuppressions(role, [
+      {
+        id: 'AwsSolutions-IAM5',
+        reason: 'The role created per requirement specified in for CloudWatch Logs https://docs.aws.amazon.com/grafana/latest/userguide/AMG-manage-permissions.html',
+      },
+    ]);
 
     return new grafana.CfnWorkspace(this, util.format("%s-%s", Stack.of(this).stackName, "workspace"),
       {
@@ -309,7 +210,7 @@ export class CdkStack extends cdk.Stack {
       });
   }
 
-  createResponseHeaderPolicy1(name: string, pattern?: string | undefined, stage?: string | undefined, originId?: string | undefined): cloudfront.CfnResponseHeadersPolicy {
+  createResponseHeaderPolicy(name: string, stage?: string | undefined, pattern?: string | undefined, originId?: string | undefined): cloudfront.CfnResponseHeadersPolicy {
     let labels = '';
     if (originId) {
       labels += `origin;desc="${originId}"`;
@@ -336,11 +237,6 @@ export class CdkStack extends cdk.Stack {
             items: ['*'],
           },
           originOverride: false,
-          // the properties below are optional
-          // accessControlExposeHeaders: {
-          //   items: ['*'],
-          // },
-          // accessControlMaxAgeSec: 600,
         },
         customHeadersConfig: {
           items: [

@@ -1,0 +1,39 @@
+<html>
+    <head>
+<script type="module" defer>
+  import {onTTFB, onResource,onFCP, onLCP,sendToAnalytics} from './public/scripts/web-vitals.attribution.js';
+  onLCP(sendToAnalytics);
+  onFCP(sendToAnalytics);
+  onTTFB(sendToAnalytics);
+  onResource(sendToAnalytics);
+</script>
+<script>
+  (function(n,i,v,r,s,c,x,z){x=window.AwsRumClient={q:[],n:n,i:i,v:v,r:r,c:c};window[n]=function(c,p){x.q.push({c:c,p:p});};z=document.createElement('script');z.async=true;z.src=s;document.head.insertBefore(z,document.head.getElementsByTagName('script')[0]);})(
+    'cwr',
+    '3d427fef-71cd-4a17-8db9-24ba8fb9c203',
+    '1.0.0',
+    'eu-west-1',
+    'https://client.rum.us-east-1.amazonaws.com/1.12.0/cwr.js',
+    {
+      sessionSampleRate: 1,
+      guestRoleArn: "arn:aws:iam::444603092185:role/CloudFrontMonitoringStack-idprole816BAD8B-CCUNQB0IWAV0",
+      identityPoolId: "eu-west-1:e7be7fa1-a1c1-4815-9562-f37d134466c1",
+      endpoint: "https://dataplane.rum.eu-west-1.amazonaws.com",
+      telemetries: ["http","errors"],
+      allowCookies: true,
+      enableXRay: false
+    }
+  );
+</script>
+  <link rel="stylesheet" href="./public/css/main.css">
+    <link rel="stylesheet" href="./public/css/servicehomepage.css">
+    </head>
+    <body>
+         Test Page 
+        <img src="./public/images/bruno-emmanuelle-oBzeCH75UHE-unsplash.jpg" width="300"/>
+        <img src="./public/images/hans-isaacson-gWsvWQaYexo-unsplash.jpg" width="300"/>
+        <img src="./public/images/henry-lai-aVW-9y-sS3E-unsplash.jpg" width="300"/>
+        <img src="./public/images/jeremy-hynes-QmSKOT7rnWQ-unsplash.jpg" width="300"/>
+        <!-- <img src="./public/images/jocelyn-morales-WMyeXpXNMYs-unsplash.jpg" width="300"/> -->
+    </body>
+</html>
