@@ -1,17 +1,5 @@
 /*
- * Copyright 2020 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * This is custom code
  */
 
 // import { onBFCacheRestore } from './lib/bfcache.js';
@@ -38,13 +26,10 @@ const whenReady = (callback: () => void) => {
 }
 
 /**
- * Calculates the [FID](https://web.dev/fid/) value for the current page and
+ * Calculates the performance metrics for resources and 
  * calls the `callback` function once the value is ready, along with the
- * relevant `first-input` performance entry used to determine the value. The
+ * relevant performance entry used to determine the value. The
  * reported value is a `DOMHighResTimeStamp`.
- *
- * _**Important:** since FID is only reported after the user interacts with the
- * page, it's possible that it will not be reported for some page loads._
  */
 export const onResource = (onReport: ReportCallback, opts?: ReportOpts) => {
   // Set defaults
@@ -82,10 +67,6 @@ export const onResource = (onReport: ReportCallback, opts?: ReportOpts) => {
       console.log("= Calculate Load Times: performance NOT supported");
       return;
     }
-
-    // Get a list of "resource" performance entries
-    // let resources = performance.getEntriesByType("resource");
-    // (resources as PerformanceResourceTiming[]).forEach(handleEntry)
 
     if (po) {
       onHidden(() => {

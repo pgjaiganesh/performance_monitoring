@@ -22,7 +22,7 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1672347316650,
+  "iteration": 1673450702716,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -389,7 +389,7 @@
           "hide": false,
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -694,7 +694,7 @@
           "expression": "filter event_type='cdn_metrics' and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats pct(event_details.sthcdndownstreamfblduration,${percentile}) as originFBL by event_details.env,bin(5m) as event_timestamp\n|display event_timestamp,event_details.env,originFBL",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -905,7 +905,7 @@
           "expression": "filter event_type=\"cdn_metrics\" and event_details.env in [${environment:singlequote}] and metadata.countryCode in [${country:singlequote}]\n|stats sum(event_details.transferSize) as transferSize, count() as totalRequests by event_details.env,bin(5m) as event_timestamp\n|display event_timestamp,event_details.env,transferSize/totalRequests ",
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -919,6 +919,118 @@
       ],
       "title": "Average Object Size by environment : ${country}",
       "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-RdYlGr"
+          },
+          "mappings": [],
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 40
+              },
+              {
+                "color": "orange",
+                "value": 50
+              },
+              {
+                "color": "#EAB839",
+                "value": 60
+              },
+              {
+                "color": "green",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/prod/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/stage/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 13,
+        "x": 0,
+        "y": 19
+      },
+      "id": 50,
+      "options": {
+        "displayMode": "lcd",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": true
+        },
+        "showUnfilled": true
+      },
+      "pluginVersion": "8.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "7kalSkc4z"
+          },
+          "expression": "filter event_type='cdn_metrics' \n|filter event_details.metricType='RESOURCE' or event_details.metricType='TTFB' \n|filter event_details.env in [${environment:singlequote}]  and metadata.countryCode in [${country:singlequote}]\n|stats count(event_details.sthcdncachehit) as cachehit,count(event_details.sthcdncachemiss) as cachemiss,cachehit/(cachemiss+cachehit) as chr by event_details.initiatorType as behavior,event_details.env\n|display behavior,event_details.env,chr\n|sort behavior",
+          "id": "",
+          "logGroupNames": [
+            "${log_group}"
+          ],
+          "namespace": "",
+          "queryMode": "Logs",
+          "refId": "A",
+          "region": "default",
+          "statsGroups": [
+            "behavior",
+            "event_details.env"
+          ]
+        }
+      ],
+      "title": "CHR by Content Type by environment: ${country}",
+      "transformations": [],
+      "type": "bargauge"
     },
     {
       "fieldConfig": {
@@ -973,9 +1085,9 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
-        "w": 7,
-        "x": 0,
+        "h": 8,
+        "w": 11,
+        "x": 13,
         "y": 19
       },
       "id": 12,
@@ -1016,78 +1128,86 @@
       "type": "timeseries"
     },
     {
-      "datasource": {
-        "type": "grafana-athena-datasource",
-        "uid": "T2kYlvcVk"
-      },
       "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
-            "fixedColor": "red",
-            "mode": "fixed"
+            "mode": "continuous-YlBl"
           },
           "mappings": [],
           "thresholds": {
-            "mode": "percentage",
+            "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "orange",
-                "value": 70
-              },
-              {
-                "color": "red",
-                "value": 85
               }
             ]
           },
-          "unit": "short"
+          "unit": "decbytes"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 9,
-        "w": 5,
-        "x": 7,
-        "y": 19
+        "w": 12,
+        "x": 0,
+        "y": 27
       },
-      "id": 49,
+      "id": 42,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
+        "displayMode": "gradient",
+        "orientation": "horizontal",
         "reduceOptions": {
           "calcs": [],
           "fields": "",
           "values": true
         },
-        "textMode": "auto"
+        "showUnfilled": true
       },
       "pluginVersion": "8.4.7",
       "targets": [
         {
-          "connectionArgs": {
-            "catalog": "__default",
-            "database": "__default",
-            "region": "__default"
-          },
           "datasource": {
-            "type": "grafana-athena-datasource",
-            "uid": "T2kYlvcVk"
+            "type": "cloudwatch",
+            "uid": "7kalSkc4z"
           },
-          "format": 1,
-          "rawSQL": "select sc_status,count(*) from rtlogs2 where dt between '${__from:date:YYYY-MM-DD-HH}' and '${__to:date:YYYY-MM-DD-HH}' and sc_status!='200' and c_country in (${country:singlequote}) group by sc_status;",
+          "expression": "filter event_type='cdn_metrics' and metadata.countryCode in [${country:singlequote}] and event_details.env in [${environment:singlequote}]\n|stats sum(event_details.transferSize) as totalBytes by event_details.sthcdnpop as PoP\n|display PoP,totalBytes\n|sort totalBytes desc\n|limit 10",
+          "id": "",
+          "logGroupNames": [
+            "${log_group}"
+          ],
+          "namespace": "",
+          "queryMode": "Logs",
           "refId": "A",
-          "table": "rtlogs2"
+          "region": "default",
+          "statsGroups": [
+            "PoP"
+          ]
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "7kalSkc4z"
+          },
+          "expression": "filter event_type='cdn_metrics' and metadata.countryCode in [${country:singlequote}] and event_details.env in [${environment:singlequote}]\n|stats count() as totalRequests by event_details.sthcdnpop as PoP\n|display PoP,totalRequests\n|sort totalBytes desc\n|limit 10",
+          "hide": true,
+          "id": "",
+          "logGroupNames": [
+            "${log_group}"
+          ],
+          "namespace": "",
+          "queryMode": "Logs",
+          "refId": "B",
+          "region": "default",
+          "statsGroups": [
+            "PoP"
+          ]
         }
       ],
-      "title": "#Requests with non 200OK",
-      "type": "stat"
+      "title": "Busiest Edge Locations (Top 10)",
+      "transformations": [],
+      "type": "bargauge"
     },
     {
       "fieldConfig": {
@@ -1143,9 +1263,9 @@
       },
       "gridPos": {
         "h": 9,
-        "w": 11,
+        "w": 12,
         "x": 12,
-        "y": 19
+        "y": 27
       },
       "id": 40,
       "options": {
@@ -1183,88 +1303,6 @@
       ],
       "title": "Page Views by Edge Location: ${country}",
       "type": "timeseries"
-    },
-    {
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "continuous-YlBl"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "decbytes"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 28
-      },
-      "id": 42,
-      "options": {
-        "displayMode": "gradient",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [],
-          "fields": "",
-          "values": true
-        },
-        "showUnfilled": true
-      },
-      "pluginVersion": "8.4.7",
-      "targets": [
-        {
-          "datasource": {
-            "type": "cloudwatch",
-            "uid": "7kalSkc4z"
-          },
-          "expression": "filter event_type='cdn_metrics' and metadata.countryCode in [${country:singlequote}] and event_details.env in [${environment:singlequote}]\n|stats sum(event_details.transferSize) as totalBytes by event_details.sthcdnpop as PoP\n|display PoP,totalBytes\n|sort totalBytes desc\n|limit 10",
-          "id": "",
-          "logGroupNames": [
-            "${log_group}"
-          ],
-          "namespace": "",
-          "queryMode": "Logs",
-          "refId": "A",
-          "region": "default",
-          "statsGroups": [
-            "PoP"
-          ]
-        },
-        {
-          "datasource": {
-            "type": "cloudwatch",
-            "uid": "7kalSkc4z"
-          },
-          "expression": "filter event_type='cdn_metrics' and metadata.countryCode in [${country:singlequote}] and event_details.env in [${environment:singlequote}]\n|stats count() as totalRequests by event_details.sthcdnpop as PoP\n|display PoP,totalRequests\n|sort totalBytes desc\n|limit 10",
-          "hide": true,
-          "id": "",
-          "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
-          ],
-          "namespace": "",
-          "queryMode": "Logs",
-          "refId": "B",
-          "region": "default",
-          "statsGroups": [
-            "PoP"
-          ]
-        }
-      ],
-      "title": "Busiest Edge Locations (Top 10)",
-      "transformations": [],
-      "type": "bargauge"
     },
     {
       "collapsed": false,
@@ -1602,7 +1640,7 @@
           "hide": false,
           "id": "",
           "logGroupNames": [
-            "/aws/vendedlogs/RUMService_CloudFrontMonitoringStack-rum7f414c06"
+            "${log_group}"
           ],
           "namespace": "",
           "queryMode": "Logs",
@@ -3407,7 +3445,7 @@
       "type": "stat"
     }
   ],
-  "refresh": "",
+  "refresh": false,
   "schemaVersion": 35,
   "style": "dark",
   "tags": [],
@@ -3596,13 +3634,13 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-12h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Observability: Website Performance",
   "uid": "FL-7Nz5Vk",
-  "version": 98,
+  "version": 101,
   "weekStart": ""
 }
