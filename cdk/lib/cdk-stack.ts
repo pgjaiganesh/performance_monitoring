@@ -4,17 +4,14 @@ import * as util from "util";
 import * as path from "path";
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
-import { CfnOutput, Duration, RemovalPolicy, Stack, StackProps, Fn } from 'aws-cdk-lib';
-import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
-import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
-import * as route53 from 'aws-cdk-lib/aws-route53';
-import * as acm from 'aws-cdk-lib/aws-certificatemanager';
-import { R53Construct } from './R53Construct';
+import { RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 import { aws_rum as rum } from 'aws-cdk-lib';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as grafana from 'aws-cdk-lib/aws-grafana';
-import { NagSuppressions } from 'cdk-nag'
+import { NagSuppressions } from 'cdk-nag';
+import * as cr from 'aws-cdk-lib/custom-resources';
+import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 
 export interface CdkStackProps extends StackProps {
   // hostedZoneId: any;
@@ -38,6 +35,10 @@ export class CdkStack extends cdk.Stack {
       {
         id: 'AwsSolutions-IAM5',
         reason: 'S3 Bucket deployment is a standard CDK construct with visible controls to refine the policies.',
+      },
+      {
+        id: 'AwsSolutions-L1',
+        reason: 'Lambda Functions being created is from CDK AwsCustomResource library'
       },
     ]);
 
@@ -132,8 +133,35 @@ export class CdkStack extends cdk.Stack {
       cwLogEnabled: true,
     });
 
+    this.setCustomEventsEnabled(cfnAppMonitor, true);
     this.createGrafanaWorkspace(props?.organizationalUnitId);
   }
+
+  setCustomEventsEnabled(appMonitor: rum.CfnAppMonitor,
+    isEnabled: boolean) {
+    // Setting custom events is not yet supported through CDK
+    const appMonitorArn = `arn:aws:rum:${Stack.of(this).region}:${Stack.of(this).account}:appmonitor/${appMonitor.name}`;
+    const awsRumSdkCall: cr.AwsSdkCall = {
+      service: 'RUM',
+      action: 'updateAppMonitor',
+      parameters: {
+        Name: appMonitor.name,
+        CustomEvents: { Status: isEnabled ? 'ENABLED' : 'DISABLED' },
+      },
+      physicalResourceId: cr.PhysicalResourceId.of(appMonitor.ref),
+    };
+
+    const customResource = new cr.AwsCustomResource(this, 'SetAppMonitorCustomEvents', {
+      policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
+        resources: [appMonitorArn],
+      }),
+      installLatestAwsSdk: true,
+      onCreate: awsRumSdkCall,
+      onUpdate: awsRumSdkCall,
+    });
+
+    customResource.node.addDependency(appMonitor);
+  };
 
   createGrafanaWorkspace(orgId?: string) {
     let role = new iam.Role(this, "grafana-role1", {
