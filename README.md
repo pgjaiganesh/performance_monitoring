@@ -144,6 +144,17 @@ A sample HTML page can be found
 
 and click *‘Import’*
 
+14. Update the 'log_group' variable to point to your CloudWatch Log Group for RUM.
+- Go to 'Dashboard settings'
+![Grafana](/images/grafana11.jpg)
+- Go to Variables section
+![Grafana](/images/grafana12.jpg)
+- Edit the 'log_group' variable and point it to log group name (from above section CloudWatch RUM step 6)
+![Grafana](/images/grafana13.jpg)
+- Click 'Update' and 'Save dashboard' to save the changes.
+![Grafana](/images/grafana14.jpg)
+
+
 Check to see the dashboard panels show up. Note, data may not be present initially.
 
 ## Additional Learning Resources:
