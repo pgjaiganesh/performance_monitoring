@@ -8,7 +8,7 @@ export ORG_UNIT_ID=''
 # AWS Region to deploy the solution
 export CDK_DEPLOY_REGION=''
 # npm audit fix
-cd ../web-vitals && npm audit fix && npm run build
+cd ../web-vitals && npm install && npm audit fix && npm run build
 cd ../cdk
 npm install
 npx cdk bootstrap --profile $AWS_PROFILE
