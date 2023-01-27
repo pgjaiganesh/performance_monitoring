@@ -20,7 +20,6 @@ export interface CdkStackProps extends StackProps {
   profile: any;
   // deployStaging: boolean;
   // deployMultiCDN: boolean;
-  organizationalUnitId: string;
 };
 
 export class CdkStack extends cdk.Stack {
@@ -134,7 +133,7 @@ export class CdkStack extends cdk.Stack {
     });
 
     this.setCustomEventsEnabled(cfnAppMonitor, true);
-    this.createGrafanaWorkspace(props?.organizationalUnitId);
+    this.createGrafanaWorkspace();
   }
 
   setCustomEventsEnabled(appMonitor: rum.CfnAppMonitor,
@@ -163,7 +162,7 @@ export class CdkStack extends cdk.Stack {
     customResource.node.addDependency(appMonitor);
   };
 
-  createGrafanaWorkspace(orgId?: string) {
+  createGrafanaWorkspace() {
     let role = new iam.Role(this, "grafana-role1", {
       assumedBy: new iam.ServicePrincipal('grafana.amazonaws.com', {
         conditions:
@@ -232,7 +231,6 @@ export class CdkStack extends cdk.Stack {
         dataSources: ["CLOUDWATCH"],
         accountAccessType: "CURRENT_ACCOUNT",
         authenticationProviders: ["AWS_SSO"],
-        organizationalUnits: [orgId!],
         permissionType: "SERVICE_MANAGED",
         roleArn: role.roleArn
       });

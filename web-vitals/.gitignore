@@ -13,3 +13,4 @@ dist
 
 # Husky files
 .husky
+package-lock.json
